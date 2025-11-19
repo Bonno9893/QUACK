@@ -134,9 +134,7 @@ The cluster expansion algorithm addresses the problem of adding exactly T new po
 The problem is formulated as a Quadratic Unconstrained Binary Optimization (QUBO):
 
 ```
-$$
 min Σ(i,j) d_ij * x_i * x_j + λ₂ * (Σx_i - T)²
-$$
 ```
 
 Where:
