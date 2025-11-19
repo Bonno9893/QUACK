@@ -37,7 +37,7 @@ class DWaveConfig:
     """Configuration parameters for D-Wave solver."""
     api_token: str
     solver_name: Optional[str] = None
-    num_reads: int = 1000
+    num_reads: int = 100
     annealing_time: int = 20  # microseconds
     chain_strength: Optional[float] = None
     auto_scale: bool = True
