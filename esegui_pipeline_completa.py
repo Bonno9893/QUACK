@@ -2,8 +2,7 @@
 """
 Pipeline Completa per Caso d'Uso Bancario QUACK con D-Wave
 
-Questo script orchestra l'intero workflow per risolvere problemi di clustering
-nel settore bancario usando il quantum annealing. Include:
+Questo script orchestra l'intero workflow richiamando gli altri moduli:
 1. Caricamento e preprocessamento dati
 2. Generazione istanze
 3. Ottimizzazione parametro lambda
