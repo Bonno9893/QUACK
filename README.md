@@ -193,7 +193,7 @@ soluzione = risolutore.risolvi(
 
 ## Riepilogo dei Risultati
 
-## Sviluppo
+## Team di Sviluppo
 
 Benedetta Ferrari, Mirko Mucciarini, Filippo Bonafè
 
