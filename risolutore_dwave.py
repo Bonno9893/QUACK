@@ -8,486 +8,823 @@ formulazione QUBO all'esecuzione quantistica e al processamento dei risultati.
 Caratteristiche Principali:
     - Embedding automatico alla topologia dell'hardware quantistico
     - Parametri di annealing configurabili
-    - Ottimizzazione della forza delle catene
-    - Post-processamento e validazione dei risultati
+    - Ottimizzazione della chain strength
+    - Post-processing e validazione dei risultati
     - Raccolta delle metriche di performance
 
 Autore: Team Progetto QUACK
 Data: 2024
 Licenza: MIT
 """
+import pickle
+def salva_istanza(instance, nome_file):
+    with open(nome_file, 'wb') as file:
+        pickle.dump(instance, file)
+    print(f"Istanza salvata in '{nome_file}'")
 
-import numpy as np
+def carica_istanza(nome_file):
+    # Carica il modello
+    with open(nome_file, 'rb') as file:
+        models = pickle.load(file)
+    print("Istanza caricata con successo.")
+
+    return models
+
+token="IL TUO TOKEN"
+
 import time
-import logging
-from typing import Dict, List, Tuple, Optional, Any
-from dataclasses import dataclass
-
+from dwave.system import DWaveSampler, EmbeddingComposite
+from dwave.embedding.chain_strength import uniform_torque_compensation
+from dwave.system import DWaveCliqueSampler
+import dwave.inspector
 from dimod import BinaryQuadraticModel
-from dwave.system import DWaveSampler, EmbeddingComposite, FixedEmbeddingComposite
-from dwave.embedding import find_embedding
-import minorminer
+import numpy as np
+#neal simulated annealing
+from neal import SimulatedAnnealingSampler
 
-# Configurazione del logging
-logger = logging.getLogger(__name__)
+def cluster_points_clique(n_coordinates, d, indexs_i0, n_points_to_add, l2, quantum,n_iteration,inspector,chainstrenght,cs_value):
+    """Perform clustering analysis on given points
 
-
-@dataclass
-class ConfigurazioneDWave:
-    """Parametri di configurazione per il risolutore D-Wave."""
-    token_api: str
-    nome_risolutore: Optional[str] = None
-    num_letture: int = 1000
-    tempo_annealing: int = 20  # microsecondi
-    forza_catena: Optional[float] = None
-    auto_scala: bool = True
-    usa_embedding_fisso: bool = False
-    topologia: str = "zephyr"  # pegasus, zephyr, o chimera
-
-
-@dataclass
-class SoluzioneQuantistica:
-    """Contenitore per la soluzione del quantum annealing e metadati."""
-    miglior_campione: Dict[str, int]
-    energia: float
-    num_occorrenze: int
-    è_fattibile: bool
-    indici_selezionati: np.ndarray
-    info_tempistiche: Dict[str, float]
-    info_embedding: Dict[str, Any]
-    tutti_campioni: Optional[List[Dict]] = None
-
-
-class RisolutoreClusteringDWave:
+    Args:
+        scattered_points (list of tuples):
+            Points to be clustered
+        filename (str):
+            Output file for graphic
+        problem_inspector (bool):
+            Whether to show problem inspector
     """
-    Una classe risolutore per problemi di clustering usando il quantum annealing D-Wave.
-    
-    Questa classe gestisce il workflow completo per risolvere problemi di clustering
-    su hardware quantistico, inclusi embedding, tuning dei parametri, e interpretazione
-    dei risultati.
+
+    # Tot num of ponts
+    n_points = list(range(n_coordinates))
+
+    #indici in I
+    idx_i = [i for i in n_points if i not in indexs_i0]
+
+    #indici in I0
+    idx_i0 = [i for i in n_points if i in indexs_i0]
+
+    #print(idx_i)
+    #print(idx_i0)
+
+    # T
+    T = n_points_to_add
+
+    # Initialize BQM (Binary Quadratic Model
+    bqm = BinaryQuadraticModel('BINARY')
+
+
+    # 1. Aggiungi variabili base meno quelle in I0
+    for i in idx_i:
+      bqm.add_variable(i, 0)
+
+    # Calcolo bi
+    b = [0]* len(n_points)
+    for i in idx_i:
+      for j in idx_i0:
+        b[i] += d[i][j]
+
+    # 2. Aggiunge funzione obiettivo (1) + (3.1)
+    for i in idx_i:
+      for j in idx_i:
+        if i != j:
+          bqm.add_interaction(i, j, d[i][j]+l2)
+
+    # 3. Aggiunge vincolo (2) + (3.1) linear + (3.2)
+    for i in idx_i:
+      bqm.add_linear(i,b[i]+l2-(l2*2*T))
+
+    # 6. Aggiunge vincolo (3.1)
+    #for i in idx_i:
+    #  for j in idx_i:
+    #    if i == j:
+    #      bqm.add_linear(i,l2)
+
+    # 7. Aggiunge vincolo (3.2)
+    #for i in idx_i:
+    #  bqm.add_linear(i,-l2*2*T)
+
+    anneal_schedule = [(0.0,0.0),(37.0,0.37),(137.0,0.37),(200.0,1.0)]
+    schmol_anneal_schedule = [(0.0,0.0),(3.7,0.37),(13.7,0.37),(20.0,1.0)]
+    more_schmol_anneal_schedule = [(0.0,0.0),(0.7,0.37),(2.8,0.37),(4.0,1.0)]
+    very_schmol_anneal_schedule = [(0.0,0.0),(0.4,0.37),(1.4,0.37),(2.0,1.0)]
+    #bqm.scale(10)
+    bqm_values = np.array(list(bqm.to_qubo()[0].values()))
+    #print("BQM:",bqm_values)
+    #print("max BQM", max(abs(bqm_values)))
+    #cs_value = max(abs(bqm_values))
+    print("Unif_torq:"+str(uniform_torque_compensation(bqm, embedding=None)))
+    #print("Unif_torq:"+str(uniform_torque_compensation(bqm)))
+    #cs_value=uniform_torque_compensation(bqm)
+    # Submit problem to D-Wave sampler
+    #EmbeddingComposite(DWaveSampler(token=token))#SimulatedAnnealingSampler()
+
+
+    if quantum == False:
+      start_time = time.time()
+      sampler = SimulatedAnnealingSampler()
+      sampleset = sampler.sample(bqm,
+                               label='Example - Clustering - SimulatedAnn',
+                               num_reads=n_iteration,
+                               #anneal_schedule=anneal_schedule)
+                               annealing_time = 10)
+    else:
+
+
+      sampler = DWaveCliqueSampler(solver={"topology__type":'zephyr'},token=token)
+
+      if chainstrenght:
+        start_time = time.time()
+        sampleset = sampler.sample(bqm,
+                                label='Example - Clustering - SimulatedAnn',
+                                num_reads=n_iteration,
+                                return_embedding=True,
+                                anneal_schedule = schmol_anneal_schedule,
+                                chain_strength= cs_value)
+                                #annealing_time = 10)
+      else:
+        start_time = time.time()
+        sampleset = sampler.sample(bqm,
+                                label='Example - Clustering - SimulatedAnn',
+                                num_reads=n_iteration,
+                                return_embedding=True,
+                                anneal_schedule = schmol_anneal_schedule)
+
+
+    end_time = time.time()-start_time
+
+    print("ANNEALING TIME:",end_time)
+    best_sample = sampleset.first.sample
+    for e in idx_i0:
+      best_sample[e] = 1
+    best_sample = dict(sorted(best_sample.items()))
+    #print(best_sample)
+
+    # Extract variables in their order
+    variables = list(bqm.variables)
+    n = len(variables)
+
+    # Map variables to indices
+    var_to_index = {var: idx for idx, var in enumerate(variables)}
+
+    # Initialize the matrix
+    qubo_matrix = np.zeros((n, n), dtype=np.float32)
+
+    # Populate the matrix
+    qubo, offset = bqm.to_qubo()
+    for (u, v), value in qubo.items():
+        i, j = var_to_index[u], var_to_index[v]
+        qubo_matrix[i, j] = value
+        if i != j:
+            qubo_matrix[j, i] = value  # Ensure symmetry
+
+    print(qubo_matrix)
+
+    ### get objective function
+    # Inizializza una stringa vuota per la funzione obiettivo
+    objective_str = ""
+
+    # Aggiungi i termini lineari
+    for var, coeff in bqm.linear.items():
+        objective_str += f"{coeff}*{var} + "
+
+    # Aggiungi i termini quadratici
+    for (var1, var2), coeff in bqm.quadratic.items():
+        objective_str += f"{coeff}*{var1}*{var2} + "
+
+    # Rimuovi l'ultimo "+ " dalla stringa
+    objective_str = objective_str[:-3]
+
+    # Stampa la funzione obiettivo
+    print("Funzione obiettivo:")
+    print(objective_str)
+
+    if quantum and inspector:
+      dwave.inspector.show(sampleset)
+
+    return best_sample,bqm,sampleset,cs_value
+
+import time
+from dwave.system import DWaveSampler, EmbeddingComposite
+from dwave.system import EmbeddingComposite, DWaveSampler
+import dwave.inspector
+from dimod import BinaryQuadraticModel
+import numpy as np
+#neal simulated annealing
+from neal import SimulatedAnnealingSampler
+
+def cluster_points_composite(n_coordinates, d, indexs_i0, n_points_to_add, l2, quantum,n_iteration,inspector,chainstrenght, cs_value):
+    """Perform clustering analysis on given points
+
+    Args:
+        scattered_points (list of tuples):
+            Points to be clustered
+        filename (str):
+            Output file for graphic
+        problem_inspector (bool):
+            Whether to show problem inspector
     """
-    
-    def __init__(self, config: ConfigurazioneDWave):
-        """
-        Inizializza il risolutore D-Wave con la configurazione.
-        
-        Parametri:
-            config (ConfigurazioneDWave): Oggetto di configurazione con parametri D-Wave
-            
-        Solleva:
-            ConnectionError: Se non riesce a connettersi al servizio cloud D-Wave
-        """
-        self.config = config
-        self.sampler = None
-        self.sampler_composito = None
-        self.embedding_fisso = None
-        
-        # Inizializza connessione a D-Wave
-        self._inizializza_sampler()
-        
-        logger.info(f"Risolutore D-Wave inizializzato con {self.sampler.properties['chip_id']}")
-        
-    def _inizializza_sampler(self) -> None:
-        """
-        Inizializza il sampler D-Wave e il composito di embedding.
-        
-        Questo metodo stabilisce la connessione all'hardware quantistico e
-        configura la strategia di embedding (fissa o dinamica).
-        """
-        try:
-            # Connetti al quantum annealer D-Wave
-            if self.config.nome_risolutore:
-                self.sampler = DWaveSampler(
-                    token=self.config.token_api,
-                    solver=self.config.nome_risolutore
-                )
-            else:
-                # Auto-selezione del risolutore basata sulla preferenza di topologia
-                caratteristiche_solver = {'topology__type': self.config.topologia}
-                self.sampler = DWaveSampler(
-                    token=self.config.token_api,
-                    solver=caratteristiche_solver
-                )
-            
-            # Configura il composito di embedding
-            if self.config.usa_embedding_fisso:
-                # Per problemi ripetuti, usa embedding fisso per consistenza
-                self.sampler_composito = FixedEmbeddingComposite(self.sampler, {})
-            else:
-                # Embedding dinamico per ogni problema
-                self.sampler_composito = EmbeddingComposite(self.sampler)
-                
-            # Registra proprietà hardware
-            proprietà = self.sampler.properties
-            logger.info(f"Connesso a: {proprietà['chip_id']}")
-            logger.info(f"Topologia: {proprietà['topology']['type']}")
-            logger.info(f"Qubit: {proprietà['num_qubits']}")
-            logger.info(f"Accoppiatori: {len(proprietà['couplers'])}")
-            
-        except Exception as e:
-            logger.error(f"Fallita inizializzazione del sampler D-Wave: {e}")
-            raise ConnectionError(f"Impossibile connettersi a D-Wave: {e}")
-    
-    def risolvi_espansione_cluster(
-        self,
-        matrice_distanze: np.ndarray,
-        cluster_seed: np.ndarray,
-        n_espandere: int,
-        penalita_lambda: float,
-        punti_candidati: Optional[np.ndarray] = None
-    ) -> SoluzioneQuantistica:
-        """
-        Risolvi il problema di espansione del cluster usando il quantum annealing.
-        
-        Questo metodo prende un cluster seed e lo espande selezionando esattamente
-        n_espandere punti aggiuntivi che minimizzano la distanza intra-cluster totale.
-        
-        Parametri:
-            matrice_distanze (np.ndarray): Matrice delle distanze a coppie
-            cluster_seed (np.ndarray): Indici dei punti nel cluster seed
-            n_espandere (int): Numero di punti da aggiungere al cluster
-            penalita_lambda (float): Parametro di penalità per il vincolo di cardinalità
-            punti_candidati (np.ndarray, opzionale): Punti candidati per l'espansione
-        
-        Ritorna:
-            SoluzioneQuantistica: Oggetto soluzione contenente risultati e metadati
-            
-        Esempio:
-            >>> risolutore = RisolutoreClusteringDWave(config)
-            >>> soluzione = risolutore.risolvi_espansione_cluster(
-            ...     matrice_distanze=mat_dist,
-            ...     cluster_seed=np.array([0, 1, 2]),
-            ...     n_espandere=5,
-            ...     penalita_lambda=2.0
-            ... )
-            >>> print(f"Punti selezionati: {soluzione.indici_selezionati}")
-        """
-        logger.info(f"Risoluzione espansione cluster: dimensione seed={len(cluster_seed)}, "
-                   f"espandi di={n_espandere}, λ={penalita_lambda:.3f}")
-        
-        # Crea formulazione QUBO
-        from ..ottimizzazione.formulazione_qubo import FormulatoreQUBO
-        formulatore = FormulatoreQUBO(matrice_distanze)
-        
-        bqm = formulatore.crea_qubo_espansione_cluster(
-            cluster_seed=cluster_seed,
-            dimensione_target=n_espandere,
-            penalita_lambda=penalita_lambda,
-            punti_candidati=punti_candidati
-        )
-        
-        # Risolvi su hardware quantistico
-        soluzione = self._risolvi_bqm(bqm, n_espandere)
-        
-        # Post-processa per ottenere gli indici dei punti effettivi
-        if punti_candidati is not None:
-            variabili_selezionate = [var for var, val in soluzione.miglior_campione.items() if val == 1]
-            indici_selezionati = [punti_candidati[int(var.split('_')[1])] for var in variabili_selezionate]
-            soluzione.indici_selezionati = np.array(indici_selezionati)
-        
-        return soluzione
-    
-    def _risolvi_bqm(
-        self,
-        bqm: BinaryQuadraticModel,
-        dimensione_target: int
-    ) -> SoluzioneQuantistica:
-        """
-        Risolvi un Modello Quadratico Binario su hardware D-Wave.
-        
-        Questo metodo interno gestisce il processo effettivo di quantum annealing,
-        inclusi calcolo della forza delle catene, embedding, ed estrazione dei risultati.
-        
-        Parametri:
-            bqm (BinaryQuadraticModel): Il modello QUBO da risolvere
-            dimensione_target (int): Numero atteso di variabili selezionate
-        
-        Ritorna:
-            SoluzioneQuantistica: Soluzione processata con metadati
-        """
-        # Calcola la forza delle catene se non fornita
-        if self.config.forza_catena is None:
-            forza_catena = self._calcola_forza_catena(bqm)
+
+    # Tot num of ponts
+    n_points = list(range(n_coordinates))
+
+    #indici in I
+    idx_i = [i for i in n_points if i not in indexs_i0]
+
+    #indici in I0
+    idx_i0 = [i for i in n_points if i in indexs_i0]
+
+    #print(idx_i)
+    #print(idx_i0)
+
+    # T
+    T = n_points_to_add
+
+    # Initialize BQM (Binary Quadratic Model
+    bqm = BinaryQuadraticModel('BINARY')
+
+
+    # 1. Aggiungi variabili base meno quelle in I0
+    for i in idx_i:
+      bqm.add_variable(i, 0)
+
+    # Calcolo bi
+    b = [0]* len(n_points)
+    for i in idx_i:
+      for j in idx_i0:
+        b[i] += d[i][j]
+
+    # 2. Aggiunge funzione obiettivo (1) + (3.1)
+    for i in idx_i:
+      for j in idx_i:
+        if i != j:
+          bqm.add_interaction(i, j, d[i][j]+l2)
+
+    # 3. Aggiunge vincolo (2) + (3.1) linear + (3.2)
+    for i in idx_i:
+      bqm.add_linear(i,b[i]+l2-(l2*2*T))
+
+    # 6. Aggiunge vincolo (3.1)
+    #for i in idx_i:
+    #  for j in idx_i:
+    #    if i == j:
+    #      bqm.add_linear(i,l2)
+
+    # 7. Aggiunge vincolo (3.2)
+    #for i in idx_i:
+    #  bqm.add_linear(i,-l2*2*T)
+
+    anneal_schedule = [(0.0,0.0),(37.0,0.37),(137.0,0.37),(200.0,1.0)]
+    schmol_anneal_schedule = [(0.0,0.0),(3.7,0.37),(13.7,0.37),(20.0,1.0)]
+    more_schmol_anneal_schedule = [(0.0,0.0),(0.7,0.37),(2.8,0.37),(4.0,1.0)]
+    very_schmol_anneal_schedule = [(0.0,0.0),(0.4,0.37),(1.4,0.37),(2.0,1.0)]
+    bqm.scale(10)
+    bqm_values = np.array(list(bqm.to_qubo()[0].values()))
+    print("BQM:",bqm_values)
+    print("max BQM", max(abs(bqm_values)))
+    print("Unif_torq:"+str(uniform_torque_compensation(bqm, embedding=None, prefactor=1.5)))
+    #cs_value = max(abs(bqm_values))
+    # Submit problem to D-Wave sampler
+    #EmbeddingComposite(DWaveSampler(token=token))#SimulatedAnnealingSampler()
+
+
+    if quantum == False:
+      start_time = time.time()
+      sampler = SimulatedAnnealingSampler()
+      sampleset = sampler.sample(bqm,
+                               label='Example - Clustering - SimulatedAnn',
+                               num_reads=n_iteration,
+                               #anneal_schedule=anneal_schedule)
+                               annealing_time = 10)
+    else:
+
+      start_time = time.time()
+      sampler = EmbeddingComposite(DWaveSampler(solver={"topology__type":'zephyr'},token=token),)
+      #sampler = EmbeddingComposite(DWaveSampler(token=token),)
+      if chainstrenght:
+        sampleset = sampler.sample(bqm,
+                                label='Example - Clustering - SimulatedAnn',
+                                num_reads=n_iteration,
+                                return_embedding=True,
+                                anneal_schedule = schmol_anneal_schedule,
+                                chain_strength= cs_value)
+                                #annealing_time = 10)
+      else:
+        sampleset = sampler.sample(bqm,
+                                label='Example - Clustering - SimulatedAnn',
+                                num_reads=n_iteration,
+                                return_embedding=True,
+                                anneal_schedule = schmol_anneal_schedule)
+
+
+    end_time = time.time()-start_time
+
+    print("ANNEALING TIME:",end_time)
+    best_sample = sampleset.first.sample
+    for e in idx_i0:
+      best_sample[e] = 1
+    best_sample = dict(sorted(best_sample.items()))
+    #print(best_sample)
+
+    # Extract variables in their order
+    variables = list(bqm.variables)
+    n = len(variables)
+
+    # Map variables to indices
+    var_to_index = {var: idx for idx, var in enumerate(variables)}
+
+    # Initialize the matrix
+    qubo_matrix = np.zeros((n, n), dtype=np.float32)
+
+    # Populate the matrix
+    qubo, offset = bqm.to_qubo()
+    for (u, v), value in qubo.items():
+        i, j = var_to_index[u], var_to_index[v]
+        qubo_matrix[i, j] = value
+        if i != j:
+            qubo_matrix[j, i] = value  # Ensure symmetry
+
+    print(qubo_matrix)
+
+    ### get objective function
+    # Inizializza una stringa vuota per la funzione obiettivo
+    objective_str = ""
+
+    # Aggiungi i termini lineari
+    for var, coeff in bqm.linear.items():
+        objective_str += f"{coeff}*{var} + "
+
+    # Aggiungi i termini quadratici
+    for (var1, var2), coeff in bqm.quadratic.items():
+        objective_str += f"{coeff}*{var1}*{var2} + "
+
+    # Rimuovi l'ultimo "+ " dalla stringa
+    objective_str = objective_str[:-3]
+
+    # Stampa la funzione obiettivo
+    print("Funzione obiettivo:")
+    print(objective_str)
+
+    if quantum and inspector:
+      dwave.inspector.show(sampleset)
+
+    return best_sample,bqm,sampleset,cs_value
+
+def calculate_OF(solution,d):
+    of = 0
+    for i in range(len(solution)):
+        for j in range(len(solution)):
+            of += d[i][j]*solution[i]*solution[j]
+
+    return of
+
+def check_solution(solution, T_plusIo, d):
+
+    of = calculate_OF(solution,d)
+    sum_sol = np.sum([int(x) for x in solution.values()])
+
+    if sum_sol == T_plusIo:
+        return True, of
+    else:
+        print(T_plusIo)
+        print("punti mancanti",T_plusIo - sum_sol)
+        return False, of
+
+#best_sample,bqm,sampler = cluster_points_v3(d.shape[0],d,indexs_i0,n_points_to_add,10.4,True,50)
+
+import pandas as pd
+
+feasible = None
+data_out = {}
+outList = []
+l2 = [
+7.190476,
+17.19048,
+37.19048,
+67.19048,
+11,
+27.19048,
+47.19048,
+101.3657,
+17.19048,
+27.19048,
+57.19048,
+131,
+27.19048,
+57.19048,
+107.1905,
+247.1905,
+7.190476,
+11,
+21,
+51,
+7.190476,
+21,
+37.19048,
+77.19048,
+11,
+27.19048,
+57.19048,
+101,
+21,
+51,
+97.19048,
+207.1905,
+3.917647,
+7.190476,
+11,
+31,
+7.190476,
+17.19048,
+27.19048,
+57.19048,
+11,
+17.19048,
+37.19048,
+71,
+17.19048,
+47.19048,
+77.19048,
+177.1905,
+11,
+21,
+47.19048,
+97.19048,
+17.19048,
+31,
+67.19048,
+131,
+17.19048,
+37.19048,
+77.19048,
+151,
+31,
+71,
+147.1905,
+287.1905,
+7.190476,
+17.19048,
+27.19048,
+67.19048,
+17.19048,
+27.19048,
+57.19048,
+101,
+17.19048,
+31,
+61,
+127.1905,
+27.19048,
+57.19048,
+127.1905,
+261,
+7.190476,
+7.190476,
+17.19048,
+37.19048,
+7.190476,
+17.19048,
+37.19048,
+77.19048,
+11,
+27.19048,
+47.19048,
+101,
+27.19048,
+57.19048,
+117.1905,
+221,
+7.190476,
+17.19048,
+37.19048,
+67.19048,
+11,
+27.19048,
+51,
+108.2889,
+17.19048,
+31,
+54.76471,
+122.5015,
+27.19048,
+57.19048,
+107.1905,
+231,
+7.190476,
+11,
+27.19048,
+51,
+11,
+17.19048,
+41,
+87.19048,
+11,
+27.19048,
+47.19048,
+97.19048,
+27.19048,
+47.19048,
+97.19048,
+211,
+7.190476,
+7.190476,
+17.19048,
+27.19048,
+7.190476,
+17.19048,
+27.19048,
+61,
+11,
+17.19048,
+41,
+87.19048,
+21,
+47.19048,
+87.19048,
+197.1905,
+182.27,
+267.29,
+312.55,
+592.42,
+137.19,
+207.20,
+272.19,
+561,
+81,
+151,
+207.19,
+457.19,
+380.45,
+525.61,
+671.37,
+1162.74,
+281.95,
+444.90,
+538.56,
+1044.57,
+167.19,
+307.19,
+417.45,
+961,
+198.33,
+277.19,
+341.68,
+597.49,
+137.19,
+217.19,
+277.21,
+517.48,
+77.19,
+131,
+217.19,
+447.45,
+157.18,
+206.44,
+261.43,
+471.39,
+102.28,
+167.52,
+211.32,
+437.45,
+57.19,
+127.19,
+157.19,
+357.19]
+
+ist_list=[0]
+
+CS = 5000
+
+for n_ist in range(168,192):
+#for n_ist in ist_list:
+    ist = carica_istanza(f'Instances-v4/istanza_{n_ist}.pkl')
+    d = ist['dm'].values
+    indexs_i0 = ist['idx_i0']
+    all_index = list(ist['dm'].index)
+    indexs_i0 = [all_index.index(e) for e in indexs_i0 if e in indexs_i0]
+    n_points_to_add = ist['n_pints_to_add']
+    print(ist)
+
+    data_out['inst'] = f'Instances/istanza_{n_ist}.pkl'
+    data_out['l2'] = l2[n_ist]
+
+    for i in range(0,10):
+        best_sample,bqm,sampler,cs = cluster_points_clique(d.shape[0],d,indexs_i0,n_points_to_add,l2[n_ist],True,100,False,True,CS)
+        res = check_solution(best_sample,n_points_to_add+len(indexs_i0),d)
+
+
+
+        data_out['iteration'] = i
+
+        data_out['chain_strenght'] = cs
+
+        if res[0] == True:
+            data_out['feasible'] = True
         else:
-            forza_catena = self.config.forza_catena
-        
-        logger.info(f"Usando forza catena: {forza_catena:.3f}")
-        
-        # Prepara parametri di campionamento
-        parametri_campionamento = {
-            'num_reads': self.config.num_letture,
-            'annealing_time': self.config.tempo_annealing,
-            'chain_strength': forza_catena,
-            'return_embedding': True,
-            'answer_mode': 'histogram'  # Ottieni risultati aggregati
-        }
-        
-        # Esegui quantum annealing
-        tempo_inizio = time.time()
-        try:
-            sampleset = self.sampler_composito.sample(bqm, **parametri_campionamento)
-        except Exception as e:
-            logger.error(f"Quantum annealing fallito: {e}")
-            raise RuntimeError(f"Errore esecuzione D-Wave: {e}")
-        
-        tempo_fine = time.time()
-        
-        # Estrai informazioni temporali
-        info_tempistiche = self._estrai_info_tempistiche(sampleset)
-        info_tempistiche['tempo_totale'] = tempo_fine - tempo_inizio
-        
-        # Estrai informazioni di embedding
-        info_embedding = self._estrai_info_embedding(sampleset)
-        
-        # Ottieni la miglior soluzione
-        miglior_campione = sampleset.first.sample
-        miglior_energia = sampleset.first.energy
-        migliori_occorrenze = sampleset.first.num_occurrences
-        
-        # Valida fattibilità della soluzione
-        conteggio_selezionati = sum(miglior_campione.values())
-        è_fattibile = (conteggio_selezionati == dimensione_target)
-        
-        # Estrai indici selezionati
-        variabili_selezionate = [var for var, val in miglior_campione.items() if val == 1]
-        indici_selezionati = np.array([int(var.split('_')[1]) for var in variabili_selezionate])
-        
-        # Registra qualità della soluzione
-        logger.info(f"Miglior soluzione: energia={miglior_energia:.3f}, "
-                   f"occorrenze={migliori_occorrenze}/{self.config.num_letture}, "
-                   f"fattibile={è_fattibile}")
-        
-        # Compila tutti i campioni se richiesto
-        tutti_campioni = None
-        if hasattr(sampleset, 'record'):
-            tutti_campioni = [
-                {
-                    'campione': dict(zip(sampleset.variables, sample)),
-                    'energia': energy,
-                    'num_occorrenze': num_occ
-                }
-                for sample, energy, num_occ in sampleset.record
-            ]
-        
-        return SoluzioneQuantistica(
-            miglior_campione=miglior_campione,
-            energia=miglior_energia,
-            num_occorrenze=migliori_occorrenze,
-            è_fattibile=è_fattibile,
-            indici_selezionati=indici_selezionati,
-            info_tempistiche=info_tempistiche,
-            info_embedding=info_embedding,
-            tutti_campioni=tutti_campioni
-        )
-    
-    def _calcola_forza_catena(self, bqm: BinaryQuadraticModel) -> float:
-        """
-        Calcola la forza catena appropriata per il problema.
-        
-        La forza catena deve essere abbastanza grande per mantenere l'integrità
-        delle catene ma non così grande da dominare la scala energetica del problema.
-        
-        Parametri:
-            bqm (BinaryQuadraticModel): Il modello QUBO
-        
-        Ritorna:
-            float: Forza catena calcolata
-        """
-        # Ottieni il range dei coefficienti nel BQM
-        range_lineare = 0
-        if bqm.linear:
-            valori_lineari = list(bqm.linear.values())
-            range_lineare = max(valori_lineari) - min(valori_lineari)
-        
-        range_quadratico = 0
-        if bqm.quadratic:
-            valori_quadratici = list(bqm.quadratic.values())
-            range_quadratico = max(valori_quadratici) - min(valori_quadratici)
-        
-        # La forza catena dovrebbe essere maggiore della scala energetica del problema
-        # Euristica comune: 1.5-2x la magnitudine massima del coefficiente
-        coeff_max = max(range_lineare, range_quadratico)
-        
-        # Aggiungi un buffer per i termini di vincolo (che sono tipicamente più grandi)
-        forza_catena = 1.5 * coeff_max
-        
-        # Assicura forza catena minima
-        forza_catena = max(forza_catena, 1.0)
-        
-        logger.info(f"Forza catena calcolata: {forza_catena:.3f} "
-                   f"(range lineare: {range_lineare:.3f}, "
-                   f"range quadratico: {range_quadratico:.3f})")
-        
-        return forza_catena
-    
-    def _estrai_info_tempistiche(self, sampleset) -> Dict[str, float]:
-        """
-        Estrai informazioni dettagliate sui tempi dal sampleset.
-        
-        Parametri:
-            sampleset: Oggetto sampleset D-Wave
-        
-        Ritorna:
-            Dict[str, float]: Breakdown dei tempi in secondi
-        """
-        tempistiche = {}
-        
-        if hasattr(sampleset, 'info') and 'timing' in sampleset.info:
-            timing_dwave = sampleset.info['timing']
-            
-            # Converti microsecondi in secondi per i campi rilevanti
-            campi_timing = {
-                'qpu_access_time': 1e-6,  # Tempo totale di accesso QPU
-                'qpu_programming_time': 1e-6,  # Tempo per programmare la QPU
-                'qpu_sampling_time': 1e-6,  # Tempo effettivo di annealing
-                'qpu_anneal_time_per_sample': 1e-6,  # Tempo annealing per campione
-                'qpu_readout_time_per_sample': 1e-6,  # Tempo lettura per campione
-                'qpu_delay_time_per_sample': 1e-6,  # Delay tra campioni
-                'post_processing_overhead_time': 1e-6,  # Tempo post-processing
-                'total_post_processing_time': 1e-6  # Post-processing totale
-            }
-            
-            for campo, conversione in campi_timing.items():
-                if campo in timing_dwave:
-                    tempistiche[campo] = timing_dwave[campo] * conversione
-            
-            # Registra breakdown dei tempi
-            logger.debug("Breakdown tempi QPU:")
-            for chiave, valore in tempistiche.items():
-                logger.debug(f"  {chiave}: {valore:.6f} secondi")
-        
-        return tempistiche
-    
-    def _estrai_info_embedding(self, sampleset) -> Dict[str, Any]:
-        """
-        Estrai informazioni di embedding dal sampleset.
-        
-        Parametri:
-            sampleset: Oggetto sampleset D-Wave
-        
-        Ritorna:
-            Dict[str, Any]: Statistiche di embedding
-        """
-        info_embedding = {}
-        
-        if hasattr(sampleset, 'info') and 'embedding_context' in sampleset.info:
-            contesto = sampleset.info['embedding_context']
-            
-            if 'embedding' in contesto:
-                embedding = contesto['embedding']
-                
-                # Calcola statistiche di embedding
-                lunghezze_catene = [len(catena) for catena in embedding.values()]
-                
-                info_embedding = {
-                    'num_variabili_logiche': len(embedding),
-                    'num_qubit_fisici': sum(lunghezze_catene),
-                    'lunghezza_catena_max': max(lunghezze_catene) if lunghezze_catene else 0,
-                    'lunghezza_catena_media': np.mean(lunghezze_catene) if lunghezze_catene else 0,
-                    'lunghezza_catena_min': min(lunghezze_catene) if lunghezze_catene else 0
-                }
-                
-                # Controlla rotture di catena
-                if 'chain_break_fraction' in contesto:
-                    info_embedding['frazione_rotture_catena'] = contesto['chain_break_fraction']
-                
-                logger.debug(f"Statistiche embedding: {info_embedding}")
-        
-        return info_embedding
-    
-    def risolvi_batch(
-        self,
-        problemi: List[Dict[str, Any]],
-        parallelo: bool = False
-    ) -> List[SoluzioneQuantistica]:
-        """
-        Risolvi più problemi di clustering in batch.
-        
-        Questo metodo può opzionalmente riusare gli embedding per problemi simili
-        per migliorare le performance.
-        
-        Parametri:
-            problemi (List[Dict]): Lista di specifiche dei problemi
-            parallelo (bool): Se usare embedding parallelo (se disponibile)
-        
-        Ritorna:
-            List[SoluzioneQuantistica]: Soluzioni per tutti i problemi
-        """
-        soluzioni = []
-        
-        # Se usando embedding fisso, calcolalo una volta per il primo problema
-        if self.config.usa_embedding_fisso and problemi:
-            primo_problema = problemi[0]
-            # Genera embedding dal primo problema
-            # ... (codice generazione embedding)
-        
-        for i, problema in enumerate(problemi):
-            logger.info(f"Risoluzione problema {i+1}/{len(problemi)}")
-            
-            soluzione = self.risolvi_espansione_cluster(
-                matrice_distanze=problema['matrice_distanze'],
-                cluster_seed=problema.get('cluster_seed', np.array([])),
-                n_espandere=problema['n_espandere'],
-                penalita_lambda=problema['penalita_lambda']
-            )
-            
-            soluzioni.append(soluzione)
-        
-        return soluzioni
-    
-    def ottimizza_schedule_annealing(
-        self,
-        bqm: BinaryQuadraticModel,
-        schedule_test: Optional[List[List[Tuple[float, float]]]] = None
-    ) -> Dict[str, Any]:
-        """
-        Sperimenta con diversi schedule di annealing per trovare i parametri ottimali.
-        
-        Parametri:
-            bqm (BinaryQuadraticModel): Problema da testare
-            schedule_test (List): Schedule di annealing personalizzati da testare
-        
-        Ritorna:
-            Dict[str, Any]: Miglior schedule e metriche di performance
-        """
-        if schedule_test is None:
-            # Schedule di default da testare
-            schedule_test = [
-                [(0.0, 0.0), (20.0, 1.0)],  # Lineare standard
-                [(0.0, 0.0), (10.0, 0.5), (20.0, 1.0)],  # Pausa nel mezzo
-                [(0.0, 0.0), (5.0, 0.8), (20.0, 1.0)],  # Rampa veloce
-            ]
-        
-        miglior_schedule = None
-        miglior_energia = float('inf')
-        risultati = []
-        
-        for schedule in schedule_test:
-            logger.info(f"Test schedule: {schedule}")
-            
-            # Campiona con schedule personalizzato
-            sampleset = self.sampler.sample(
-                bqm,
-                num_reads=100,
-                anneal_schedule=schedule
-            )
-            
-            # Registra risultati
-            energia_media = np.mean([s.energy for s in sampleset])
-            energia_min = sampleset.first.energy
-            
-            risultati.append({
-                'schedule': schedule,
-                'energia_media': energia_media,
-                'energia_min': energia_min
-            })
-            
-            if energia_min < miglior_energia:
-                miglior_energia = energia_min
-                miglior_schedule = schedule
-        
-        return {
-            'miglior_schedule': miglior_schedule,
-            'miglior_energia': miglior_energia,
-            'tutti_risultati': risultati
-        }
+            data_out['feasible'] = False
+
+        data_out['OF'] = res[1]
+
+        for key, value in sampler.info.items():
+            if isinstance(value, dict):
+                for sub_key, sub_value in value.items():
+                    if isinstance(sub_value, dict):
+                        for sub_sub_key, sub_sub_value in sub_value.items():
+                            data_out[f"{key}.{sub_key}.{sub_sub_key}"] = sub_sub_value
+                    else:
+                        data_out[f"{key}.{sub_key}"] = sub_value
+            else:
+                data_out[key] = value
+
+        outList.append(data_out.copy())
+
+df = pd.DataFrame(outList)
+
+# Esportazione in Excel
+df.to_csv(f"output_bacino400_168to191_100runs_Cliq_Cs{CS}.csv", sep=';', decimal=',')
+#df.to_csv("output_0_143_50runs_Lmb-cliq.csv", index=False)
+
+df = pd.DataFrame(outList)
+
+# Esportazione in Excel
+df.to_excel("output_8_47.xlsx", index=False)
+
+check_solution(best_sample,n_points_to_add+len(indexs_i0),d)
+
+ist = carica_istanza(f'Instances-v4/istanza_{183}.pkl')
+ist
+
+sampler.info
+
+n_ist=99
+ist = carica_istanza(f'Instances/istanza_{n_ist}.pkl')
+d = ist['dm'].values
+indexs_i0 = ist['idx_i0']
+all_index = list(ist['dm'].index)
+indexs_i0 = [all_index.index(e) for e in indexs_i0 if e in indexs_i0]
+n_points_to_add = ist['n_pints_to_add']
+print(ist)
+
+#SWEEP or Fixed Trials
+import matplotlib.pyplot as plt
+
+l2 = 1
+l2_fixed_move=1 #for fixed trials
+n_iteration = 30  # Total iterations
+feasibility_list = []
+chain_list = []
+chain_value_list = []
+objective_function_list = []
+l2_values = []
+
+# Track previous feasibility for gradient calculation
+prev_feasibility = 0
+
+for i in range(n_iteration):
+    best_sample,bqm,sampler,cs = cluster_points_composite(d.shape[0],d,indexs_i0,n_points_to_add,l2,False,50,False,False,1200)
+    feasibility, objective_function = check_solution(best_sample, n_points_to_add + len(indexs_i0), d)
+    chain_warning=0
+    for key, value in sampler.info.items():
+        if key=="warnings":
+            if "chain" in str(value).lower():
+                 chain_warning=1
+
+    for key, value in sampler.info.items():
+        if key == "embedding_context":
+            chain_strength_value = value.get('chain_strength')
+
+    chain_list.append(chain_warning)
+    chain_value_list.append(chain_strength_value)
+    # Convert feasibility to 1 (True) or 0 (False) for plotting
+
+    feasibility_int = int(feasibility)
+    feasibility_list.append(feasibility_int)
+    objective_function_list.append(objective_function)
+    #l2_values.append(l2_fixed_move) #for fixed move
+    l2_values.append(l2)
+    # Print feasibility and l2
+    print(feasibility, l2)
+
+    # Update Lagrange multiplier
+    l2 += 5
+    #l2_fixed_move+=1
+    # Update previous feasibility for next gradient calculation
+    prev_feasibility = feasibility_int
+
+# Find the minimum feasible solution
+min_feasible_value = min(
+    [objective_function_list[i] for i in range(len(feasibility_list)) if feasibility_list[i] == 1],
+    default=None
+)
+
+# Plotting
+plt.figure(figsize=(12, 7))
+
+# Plot all points with a line connecting them
+plt.plot(l2_values, objective_function_list, color='#DADADA', linestyle='-', linewidth=0.8)
+
+# Separate data by feasibility and chain status
+feasible_chain0 = [(l2_values[i], objective_function_list[i]) for i in range(len(feasibility_list))
+                   if feasibility_list[i] == 1 and chain_list[i] == 0]
+feasible_chain1 = [(l2_values[i], objective_function_list[i]) for i in range(len(feasibility_list))
+                   if feasibility_list[i] == 1 and chain_list[i] == 1]
+infeasible_chain0 = [(l2_values[i], objective_function_list[i]) for i in range(len(feasibility_list))
+                    if feasibility_list[i] == 0 and chain_list[i] == 0]
+infeasible_chain1 = [(l2_values[i], objective_function_list[i]) for i in range(len(feasibility_list))
+                    if feasibility_list[i] == 0 and chain_list[i] == 1]
+
+# Plot points based on feasibility and chain status - only add label for the first point of each type
+# For feasible points without chain breaks
+if feasible_chain0:
+    l2_vals, obj_vals = zip(*feasible_chain0)
+    plt.scatter(l2_vals, obj_vals, color='blue', marker='o', label='Feasible - no chain break')
+
+    # Add chain strength annotations
+    for i, (l2, obj) in enumerate(zip(l2_vals, obj_vals)):
+        if (i%2) == 0:
+            p=-1.7
+        else:
+            p=1
+        index = l2_values.index(l2)  # Find the original index of this point
+        cs_value = round(chain_value_list[index],0)
+        plt.annotate(f"{cs_value:.0f}",
+                     (l2, obj),
+                     textcoords="offset points",
+                     xytext=(0, p*7),   # 7 points above the point
+                     ha='center',     # Horizontally centered
+                     fontsize=8)      # Smaller font size
+
+# For feasible points with chain breaks
+if feasible_chain1:
+    l2_vals, obj_vals = zip(*feasible_chain1)
+    plt.scatter(l2_vals, obj_vals, color='goldenrod', marker='v', label='Feasible - chain break')
+
+    # Add chain strength annotations
+    for i, (l2, obj) in enumerate(zip(l2_vals, obj_vals)):
+        if (i%2) == 0:
+            p=-1.7
+        else:
+            p=1
+        index = l2_values.index(l2)  # Find the original index of this point
+        cs_value = round(chain_value_list[index],0)
+        plt.annotate(f"{cs_value:.0f}",
+                     (l2, obj),
+                     textcoords="offset points",
+                     xytext=(0, p*7),   # 7 points above the point
+                     ha='center',     # Horizontally centered
+                     fontsize=8)      # Smaller font size
+
+# For infeasible points without chain breaks
+if infeasible_chain0:
+    l2_vals, obj_vals = zip(*infeasible_chain0)
+    plt.scatter(l2_vals, obj_vals, color='red', marker='o', label='Infeasible - no chain break')
+
+    # Add chain strength annotations
+    for i, (l2, obj) in enumerate(zip(l2_vals, obj_vals)):
+        if (i%2) == 0:
+            p=-1.7
+        else:
+            p=1
+        index = l2_values.index(l2)  # Find the original index of this point
+        cs_value = round(chain_value_list[index],0)
+        plt.annotate(f"{cs_value:.0f}",
+                     (l2, obj),
+                     textcoords="offset points",
+                     xytext=(0, p*7),   # 7 points above the point
+                     ha='center',     # Horizontally centered
+                     fontsize=8)      # Smaller font size
+
+# For infeasible points with chain breaks
+if infeasible_chain1:
+    l2_vals, obj_vals = zip(*infeasible_chain1)
+    plt.scatter(l2_vals, obj_vals, color='black', marker='v', label='Infeasible - chain break')
+
+    # Add chain strength annotations
+    for i, (l2, obj) in enumerate(zip(l2_vals, obj_vals)):
+        if (i%2) == 0:
+            p=-1.7
+        else:
+            p=1
+        index = l2_values.index(l2)  # Find the original index of this point
+        cs_value = round(chain_value_list[index],0)
+        plt.annotate(f"{cs_value:.0f}",
+                     (l2, obj),
+                     textcoords="offset points",
+                     xytext=(0, p*7),   # 7 points above the point
+                     ha='center',     # Horizontally centered
+                     fontsize=8)      # Smaller font size
+
+# Add an "Optimal" green line at the minimum feasible value
+if min_feasible_value is not None:
+    plt.axhline(y=min_feasible_value, color='green', linestyle='--', linewidth=1.2, label=f'Optimal: {min_feasible_value:.2f}')
+
+# Add labels, title, and legend
+plt.title('Affecting the annealing results by changing $lambda$2')
+plt.xlabel('$lambda$2')
+#plt.xlabel('trials') #for fixed moves (trials)
+plt.ylabel('Objective Function')
+plt.legend()
+
+# Save the combined plot
+plt.savefig("Sweep_Digital_default_99.png")
+
+# plt.show()
