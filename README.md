@@ -19,28 +19,18 @@ QUACK-Banking-DWave-Clustering/
 │
 ├── README.md                           # Questo file
 ├── requirements.txt                    # Dipendenze Python
-├── config.yaml                        # Impostazioni di configurazione
 │
 ├── dati/                              # Dati e istanze
 │   ├── istanze/                       # Istanze di test generate
 │   ├── grezzi/                        # Dataset bancario originale
-│   └── processati/                    # Dati preprocessati
 │
-├── src/                               # Codice sorgente
-│   ├── generazione_istanze/         # Script per creazione istanze
-│   │   ├── crea_istanze_bancarie.py
-│   │
 │   ├── ottimizzazione/                # Algoritmi di ottimizzazione core
 │   │   ├── ottimizzatore_lambda.py   # Ottimizzazione parametro lambda
-│   │   ├── formulazione_qubo.py      # Costruzione modello QUBO
 │   │
 │   ├── risolutori/                    # Implementazioni dei diversi solver
 │   │   ├── risolutore_dwave.py       # Quantum annealing D-Wave
 │   │   ├── risolutore_gurobi.py      # (DA AGGIUNGERE) Solver esatto Gurobi
 │   │   └── simulated_annealing.py    # (DA AGGIUNGERE) Implementazione SA classica
-│
-├── script/                            # Script di esecuzione
-│   ├── esegui_pipeline_completa.py  # Pipeline principale
 
 ```
 
@@ -56,8 +46,8 @@ QUACK-Banking-DWave-Clustering/
 
 ```bash
 # Clona il repository
-git clone https://github.com/tuousername/QUACK-Banking-DWave-Clustering.git
-cd QUACK-Banking-DWave-Clustering
+git clone https://github.com/tuousername/QUACK.git
+cd QUACK
 
 # Crea ambiente virtuale
 python -m venv venv
@@ -69,32 +59,8 @@ pip install -r requirements.txt
 
 ### Configurazione
 
-1. Copia il template di configurazione:
-```bash
-cp config.yaml.template config.yaml
-```
+### Esecuzione
 
-2. Modifica `config.yaml` con le tue credenziali:
-```yaml
-dwave:
-  token_api: "IL_TUO_TOKEN_DWAVE"
-  risolutore: "Advantage_system4.1"  # o il tuo solver preferito
-
-gurobi:
-  percorso_licenza: "/percorso/a/gurobi.lic"
-
-percorsi:
-  cartella_dati: "./dati"
-  cartella_risultati: "./risultati"
-```
-
-### Esecuzione della Pipeline Completa
-
-```bash
-python script/esegui_pipeline_completa.py --config config.yaml
-```
-
-Questo comando:
 1. Genera o carica le istanze di test
 2. Ottimizza i parametri λ usando Simulated Annealing
 3. Risolve usando il quantum annealer D-Wave
@@ -141,55 +107,15 @@ Il framework valuta le soluzioni usando multiple metriche:
 
 ## Esempi di Utilizzo
 
-### Creazione di Istanze Bancarie
+### Istanze Bancarie
 
-```python
-from src.generazione_istanze.crea_istanze_bancarie import GeneratoreIstanzeBancarie
 
-generatore = GeneratoreIstanzeBancarie(
-    n_clienti=16,
-    n_caratteristiche=2,
-    n_cluster=2
-)
-
-istanze = generatore.genera_istanze(
-    n_istanze=10,
-    dimensione_seed=50,
-    dimensione_espansione=20
-)
-```
 
 ### Ottimizzazione del Parametro Lambda
 
-```python
-from src.ottimizzazione.ottimizzatore_lambda import OttimizzatoreLambda
-
-ottimizzatore = OttimizzatoreLambda(
-    range_lambda=(0.1, 10.0),
-    passo=0.1
-)
-
-lambda_ottimale = ottimizzatore.ottimizza(
-    istanza=istanza,
-    risolutore='simulated_annealing',
-    max_iterazioni=100
-)
-```
 
 ### Risoluzione con D-Wave
 
-```python
-from src.risolutori.risolutore_dwave import RisolutoreDWave
-
-risolutore = RisolutoreDWave(token_api="IL_TUO_TOKEN")
-
-soluzione = risolutore.risolvi(
-    matrice_distanze=matrice_distanze,
-    n_selezionare=20,
-    penalita_lambda=lambda_ottimale,
-    num_letture=1000
-)
-```
 
 ## Riepilogo dei Risultati
 
