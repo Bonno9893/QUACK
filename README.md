@@ -1,18 +1,18 @@
 [README.md](https://github.com/user-attachments/files/23634444/README.md)
-# Progetto QUACK - Caso d'Uso Bancario con D-Wave Quantum Annealing
+# Progetto QUACK - Caso d'Uso Bancario con D-Wave Quantum Annealer
 
-## 📚 Panoramica del Progetto
+## Panoramica del Progetto
 
-Il progetto QUACK (QUAntum Clustering for Knowledge) esplora l'applicazione delle tecniche di calcolo quantistico ai problemi di clustering, con un focus specifico sulla segmentazione dei clienti nel settore bancario. Questo repository contiene l'implementazione dell'Algoritmo 1 (Espansione del Cluster) utilizzando la tecnologia di quantum annealing di D-Wave, insieme a benchmark classici usando Gurobi e Simulated Annealing.
+Il progetto QUACK (QUAntum Clustering for Knowledge) esplora l'applicazione delle tecniche di calcolo quantistico ai problemi di clustering, con un focus specifico sulla segmentazione dei clienti nel settore bancario. Questo repository contiene l'implementazione dell'Algoritmo 1 (Espansione del Cluster) del progetto, utilizzando la tecnologia di quantum annealing di D-Wave, insieme a benchmark classici usando Gurobi e Simulated Annealing.
 
-### 🎯 Obiettivi Principali
+### Obiettivi Principali
 
 - **Ottimizzazione Quantistica**: Sfruttare il quantum annealer di D-Wave per risolvere problemi di clustering vincolato
 - **Analisi Comparativa**: Confrontare le soluzioni quantistiche con i metodi classici (Gurobi, Simulated Annealing)
 - **Applicazione Reale**: Applicare il clustering quantistico alla segmentazione dei clienti bancari basata sui pattern di spesa
 - **Ottimizzazione dei Parametri**: Implementare l'ottimizzazione adattiva del parametro λ (lambda) per le formulazioni QUBO
 
-## 🏗️ Struttura del Repository
+## Struttura del Repository
 
 ```
 QUACK-Banking-DWave-Clustering/
@@ -27,47 +27,24 @@ QUACK-Banking-DWave-Clustering/
 │   └── processati/                    # Dati preprocessati
 │
 ├── src/                               # Codice sorgente
-│   ├── generazione_istanze/           # Script per creazione istanze
+│   ├── generazione_istanze/         # Script per creazione istanze
 │   │   ├── crea_istanze_bancarie.py
-│   │   └── genera_istanze_sintetiche.py
 │   │
 │   ├── ottimizzazione/                # Algoritmi di ottimizzazione core
 │   │   ├── ottimizzatore_lambda.py   # Ottimizzazione parametro lambda
 │   │   ├── formulazione_qubo.py      # Costruzione modello QUBO
-│   │   └── gestore_vincoli.py        # Gestione vincolo cardinalità
 │   │
 │   ├── risolutori/                    # Implementazioni dei diversi solver
 │   │   ├── risolutore_dwave.py       # Quantum annealing D-Wave
-│   │   ├── risolutore_gurobi.py      # Solver esatto Gurobi
-│   │   └── simulated_annealing.py    # Implementazione SA classica
-│   │
-│   └── utilita/                       # Funzioni di utilità
-│       ├── metriche_valutazione.py   # Metriche di performance
-│       ├── caricatore_dati.py        # Utilità caricamento dati
-│       └── visualizzazione.py        # Visualizzazione risultati
-│
-├── notebook/                          # Jupyter notebook
-│   ├── 01_esplorazione_dati.ipynb   # Analisi dataset
-│   ├── 02_ottimizzazione_lambda.ipynb # Processo tuning parametri
-│   └── 03_analisi_risultati.ipynb   # Confronto performance
+│   │   ├── risolutore_gurobi.py      # (DA AGGIUNGERE) Solver esatto Gurobi
+│   │   └── simulated_annealing.py    # (DA AGGIUNGERE) Implementazione SA classica
 │
 ├── script/                            # Script di esecuzione
 │   ├── esegui_pipeline_completa.py  # Pipeline principale
-│   ├── esegui_benchmark.py          # Benchmark comparativo
-│   └── genera_istanze.py            # Script generazione istanze
-│
-├── risultati/                         # Risultati output
-│   ├── metriche_performance/         # Confronti prestazioni
-│   ├── soluzioni/                    # Soluzioni clustering
-│   └── visualizzazioni/              # Grafici generati
-│
-└── docs/                              # Documentazione
-    ├── descrizione_algoritmo.md      # Spiegazione dettagliata algoritmo
-    ├── formulazione_qubo.md          # Formulazione matematica QUBO
-    └── riferimento_api.md            # Documentazione API
+
 ```
 
-## 🚀 Avvio Rapido
+## Avvio Rapido
 
 ### Prerequisiti
 
@@ -124,7 +101,7 @@ Questo comando:
 4. Confronta con i metodi classici
 5. Genera report di performance e visualizzazioni
 
-## 🔬 Descrizione dell'Algoritmo
+## Descrizione dell'Algoritmo
 
 ### Algoritmo 1: Espansione del Cluster
 
@@ -150,9 +127,9 @@ Il parametro λ₂ è cruciale per la qualità della soluzione ed è ottimizzato
 1. **Ricerca Adattiva su Griglia**: Test di valori crescenti di λ₂
 2. **Verifica di Fattibilità**: Assicura che esattamente T punti siano selezionati
 3. **Consistenza Geometrica**: Valutazione della compattezza del cluster
-4. **Cross-validazione**: Usando SA come risolutore di riferimento
+4. **Cross-validazione**: Usando SA e Gurobi come risolutori di riferimento
 
-## 📊 Metriche di Performance
+## Metriche di Performance
 
 Il framework valuta le soluzioni usando multiple metriche:
 
@@ -162,7 +139,7 @@ Il framework valuta le soluzioni usando multiple metriche:
 - **Tempo di Elaborazione Quantistico**: Tempo di accesso QPU
 - **Overhead di Embedding**: Tempo per il minor embedding sull'hardware quantistico
 
-## 🛠️ Esempi di Utilizzo
+## Esempi di Utilizzo
 
 ### Creazione di Istanze Bancarie
 
@@ -170,9 +147,9 @@ Il framework valuta le soluzioni usando multiple metriche:
 from src.generazione_istanze.crea_istanze_bancarie import GeneratoreIstanzeBancarie
 
 generatore = GeneratoreIstanzeBancarie(
-    n_clienti=1000,
-    n_caratteristiche=12,
-    n_cluster=3
+    n_clienti=16,
+    n_caratteristiche=2,
+    n_cluster=2
 )
 
 istanze = generatore.genera_istanze(
@@ -214,64 +191,25 @@ soluzione = risolutore.risolvi(
 )
 ```
 
-## 📈 Riepilogo dei Risultati
+## Riepilogo dei Risultati
 
-Basato sui nostri esperimenti con la segmentazione dei clienti bancari:
+## Sviluppo
 
-| Risolutore | ARI Medio | Tasso Fattibilità | Tempo Medio (s) |
-|------------|-----------|-------------------|-----------------|
-| D-Wave | 0.85 | 92% | 0.02 |
-| Gurobi | 0.98 | 100% | 1.5 |
-| Simulated Annealing | 0.91 | 95% | 0.3 |
+Benedetta Ferrari, Mirko Mucciarini, Filippo Bonafè
 
-**Risultati Chiave:**
-- Il quantum annealing mostra tempo di esecuzione costante indipendentemente dalla dimensione del problema
-- I metodi classici forniscono qualità di soluzione superiore per istanze piccole
-- D-Wave diventa competitivo in termini di tempo per istanze con N > 100 punti
+## Informazioni Aggiuntive
 
-## 🤝 Contributi
+https://www.linkedin.com/company/quack-project
 
-Accogliamo contributi! Consulta le nostre [Linee Guida per Contribuire](CONTRIBUTING.md) per dettagli su:
-- Standard di codice e stile
-- Requisiti di testing
-- Processo di pull request
+https://www.re-lab.it/projects/quack
 
-## 📖 Documentazione
 
-La documentazione dettagliata è disponibile nella cartella `docs/`:
-- [Descrizione Algoritmo](docs/descrizione_algoritmo.md) - Fondamenti matematici
-- [Formulazione QUBO](docs/formulazione_qubo.md) - Costruzione QUBO dettagliata
-- [Riferimento API](docs/riferimento_api.md) - Documentazione API completa
+## Pubblicazioni
 
-## 📄 Licenza
-
-Questo progetto è rilasciato sotto Licenza MIT - vedi il file [LICENSE](LICENSE) per dettagli.
-
-## 🙏 Ringraziamenti
-
-- **Team Progetto QUACK** per lo sforzo di ricerca collaborativo
-- **D-Wave Systems** per l'accesso al calcolo quantistico
-- **E4 Computer Engineering** per il supporto infrastruttura HPC
-
-## 📞 Contatti
-
-Per domande o richieste di collaborazione:
-- Responsabile Progetto: [Il Tuo Nome]
-- Email: [tua.email@esempio.com]
-- Sito Web Progetto: [Progetto QUACK](https://quack-project.eu)
-
-## 📚 Citazioni
-
-Se usi questo codice nella tua ricerca, per favore cita:
-
-```bibtex
-@article{quack2024,
-  title={Quantum Annealing per Clustering Vincolato nelle Applicazioni Bancarie},
-  author={Team QUACK},
-  journal={Applicazioni di Calcolo Quantistico},
-  year={2024}
-}
-```
+Ferrari, Benedetta, et al. "Lookalike Clustering for Customer
+Segmentation: a Comparative Study of Quantum Annealing and
+Classical Algorithms." Proceedings of the Genetic and 
+Evolutionary Computation Conference Companion. 2025.
 
 ---
 *Parte del Progetto QUACK (QUAntum Clustering for Knowledge) - Avanzamento delle applicazioni di calcolo quantistico in scenari di clustering del mondo reale*
