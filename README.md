@@ -123,7 +123,7 @@ This will:
 4. Compare with classical methods
 5. Generate performance reports and visualizations
 
-## 🔬 Algorithm Description
+## Algorithm Description
 
 ### Algorithm 1: Cluster Expansion
 
@@ -213,7 +213,7 @@ solution = solver.solve(
 )
 ```
 
-## 📈 Results Summary
+## Results Summary
 
 Based on our experiments with banking customer segmentation:
 
@@ -235,14 +235,14 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 - Testing requirements
 - Pull request process
 
-## 📖 Documentation
+## Documentation
 
 Detailed documentation is available in the `docs/` directory:
 - [Algorithm Description](docs/algorithm_description.md) - Mathematical foundations
 - [QUBO Formulation](docs/qubo_formulation.md) - Detailed QUBO construction
 - [API Reference](docs/api_reference.md) - Complete API documentation
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
