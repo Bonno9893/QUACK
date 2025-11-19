@@ -1,0 +1,161 @@
+# QUACK Banking Use Case - Configuration File
+# 
+# This file contains all configuration parameters for the clustering pipeline.
+# Copy this file to 'config.yaml' and update with your specific settings.
+
+# D-Wave Configuration
+dwave:
+  enabled: true
+  api_token: "YOUR_DWAVE_API_TOKEN"  # Replace with your actual token
+  solver: null  # null for auto-select, or specify solver name
+  num_reads: 1000  # Number of quantum annealing reads
+  annealing_time: 20  # Annealing time in microseconds
+  chain_strength: null  # null for auto-calculation
+  auto_scale: true  # Automatically scale problem to hardware range
+  topology: "zephyr"  # Preferred topology: pegasus, zephyr, or chimera
+
+# Simulated Annealing Configuration
+simulated_annealing:
+  enabled: true
+  num_reads: 10000  # Number of SA iterations
+  num_sweeps: 1000  # Sweeps per read
+  beta_range: [0.1, 10.0]  # Temperature range
+  beta_schedule_type: "geometric"  # geometric or linear
+  seed: 42  # Random seed for reproducibility
+
+# Gurobi Configuration
+gurobi:
+  enabled: true
+  license_path: null  # Path to Gurobi license file (if not in default location)
+  time_limit: 60  # Time limit in seconds
+  mip_gap: 0.01  # MIP optimality gap
+  threads: 0  # 0 for auto, or specific number
+  verbose: false  # Show Gurobi output
+
+# Data and Output Paths
+paths:
+  data_file: "data/banking_customers.csv"  # Input data file
+  results_dir: "results/"  # Base directory for all outputs
+  cache_dir: "cache/"  # Directory for caching intermediate results
+
+# Experiment Configuration
+experiment:
+  n_instances: 10  # Number of test instances to generate
+  
+  # Instance generation parameters
+  instance_params:
+    n_points: 50  # Number of points per instance
+    n_clusters: 3  # Number of clusters
+    seed_cluster_size: 10  # Initial cluster size
+    expansion_size: 20  # Points to add in expansion
+    noise_level: 0.1  # Noise in synthetic data (0-1)
+    
+  # Lambda optimization parameters
+  lambda_range: [0.1, 10.0]  # Range for lambda search
+  lambda_samples: 20  # Number of lambda values to test
+  lambda_optimization_method: "adaptive"  # adaptive or grid_search
+  
+  # Evaluation metrics
+  metrics:
+    - "ari"  # Adjusted Rand Index
+    - "silhouette"  # Silhouette coefficient
+    - "davies_bouldin"  # Davies-Bouldin index
+    - "calinski_harabasz"  # Calinski-Harabasz index
+    
+  # Benchmarking settings
+  benchmark:
+    repeat_runs: 3  # Number of times to repeat each experiment
+    warm_up_runs: 1  # Warm-up runs before timing
+    save_solutions: true  # Save all solution details
+    save_embeddings: false  # Save quantum embedding information
+
+# Visualization Settings
+visualization:
+  create_plots: true
+  plot_format: "png"  # png, pdf, or svg
+  dpi: 300  # Resolution for raster formats
+  style: "seaborn"  # matplotlib style
+  
+  # Specific plots to generate
+  plots:
+    - "performance_comparison"
+    - "scalability_analysis"
+    - "lambda_optimization"
+    - "solution_quality"
+    - "embedding_statistics"
+    - "energy_landscape"
+
+# Logging Configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  file: "pipeline.log"  # Log file path
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  console_output: true  # Also print to console
+  
+# Advanced Settings
+advanced:
+  # Parallel processing
+  parallel:
+    enabled: false  # Use parallel processing where possible
+    n_jobs: -1  # Number of parallel jobs (-1 for all CPUs)
+    backend: "multiprocessing"  # multiprocessing or threading
+  
+  # Caching
+  cache:
+    enabled: true  # Cache intermediate results
+    ttl: 3600  # Cache time-to-live in seconds
+    
+  # Error handling
+  error_handling:
+    continue_on_error: false  # Continue pipeline on solver errors
+    max_retries: 3  # Maximum retries for failed operations
+    retry_delay: 5  # Delay between retries in seconds
+  
+  # Resource limits
+  resource_limits:
+    max_memory_gb: 16  # Maximum memory usage
+    timeout_seconds: 3600  # Global timeout for pipeline
+    
+  # Reproducibility
+  reproducibility:
+    seed: 42  # Global random seed
+    deterministic: true  # Use deterministic algorithms where possible
+    save_raw_data: false  # Save raw quantum samples
+
+# Notification Settings (optional)
+notifications:
+  enabled: false
+  email:
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    sender: "your_email@gmail.com"
+    password: "your_password"
+    recipients: ["recipient@example.com"]
+  
+  # When to send notifications
+  send_on:
+    - "completion"  # Pipeline completion
+    - "error"  # Pipeline error
+    - "milestone"  # Major milestones
+
+# API Settings (for result serving)
+api:
+  enabled: false
+  host: "0.0.0.0"
+  port: 8000
+  auto_open_browser: true
+  
+# Export Settings
+export:
+  formats:
+    - "csv"  # Export results as CSV
+    - "json"  # Export as JSON
+    - "excel"  # Export as Excel
+    - "pickle"  # Export as pickle for Python
+  
+  # What to export
+  include:
+    - "metrics"  # Performance metrics
+    - "solutions"  # Solution details
+    - "configurations"  # Experiment configuration
+    - "timings"  # Detailed timing information
