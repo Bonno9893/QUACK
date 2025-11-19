@@ -1,17 +1,17 @@
 # QUACK Project - Banking Use Case with D-Wave Quantum Annealing
 
-## 📚 Project Overview
+## Project Overview
 
 The QUACK (QUAntum Clustering for Knowledge) project explores the application of quantum computing techniques to clustering problems, with a specific focus on customer segmentation in the banking sector. This repository contains the implementation of Algorithm 1 (Cluster Expansion) using D-Wave's quantum annealing technology, alongside classical benchmarks using Gurobi and Simulated Annealing.
 
-### 🎯 Key Objectives
+### Key Objectives
 
 - **Quantum Optimization**: Leverage D-Wave's quantum annealer for solving constrained clustering problems
 - **Comparative Analysis**: Benchmark quantum solutions against classical methods (Gurobi, Simulated Annealing)
 - **Real-World Application**: Apply quantum clustering to banking customer segmentation based on spending patterns
 - **Parameter Optimization**: Implement adaptive λ (lambda) parameter tuning for QUBO formulations
 
-## 🏗️ Repository Structure
+## Repository Structure
 
 ```
 QUACK-Banking-DWave-Clustering/
@@ -66,7 +66,7 @@ QUACK-Banking-DWave-Clustering/
     └── api_reference.md             # API documentation
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -151,7 +151,7 @@ The λ₂ parameter is crucial for solution quality and is optimized through:
 3. **Geometric Consistency**: Evaluating cluster compactness
 4. **Cross-validation**: Using SA as reference solver
 
-## 📊 Performance Metrics
+## Performance Metrics
 
 The framework evaluates solutions using multiple metrics:
 
@@ -161,7 +161,7 @@ The framework evaluates solutions using multiple metrics:
 - **Quantum Processing Time**: QPU access time
 - **Embedding Overhead**: Time for minor embedding on quantum hardware
 
-## 🛠️ Usage Examples
+## Usage Examples
 
 ### Creating Banking Instances
 
@@ -228,7 +228,7 @@ Based on our experiments with banking customer segmentation:
 - Classical methods provide higher solution quality for small instances
 - D-Wave becomes time-competitive for instances with N > 100 points
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on:
 - Code style and standards
@@ -246,20 +246,20 @@ Detailed documentation is available in the `docs/` directory:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **QUACK Project Team** for the collaborative research effort
 - **D-Wave Systems** for quantum computing access
 - **E4 Computer Engineering** for HPC infrastructure support
 
-## 📞 Contact
+## Contact
 
 For questions or collaboration inquiries:
 - Project Lead: [Your Name]
 - Email: [your.email@example.com]
 - Project Website: [QUACK Project](https://quack-project.eu)
 
-## 📚 Citations
+## Citations
 
 If you use this code in your research, please cite:
 
