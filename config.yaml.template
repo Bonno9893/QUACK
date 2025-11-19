@@ -8,7 +8,7 @@ dwave:
   enabled: true
   api_token: "YOUR_DWAVE_API_TOKEN"  # Replace with your actual token
   solver: null  # null for auto-select, or specify solver name
-  num_reads: 1000  # Number of quantum annealing reads
+  num_reads: 100  # Number of quantum annealing reads
   annealing_time: 20  # Annealing time in microseconds
   chain_strength: null  # null for auto-calculation
   auto_scale: true  # Automatically scale problem to hardware range
