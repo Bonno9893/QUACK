@@ -232,10 +232,8 @@ Basato sui nostri esperimenti con la segmentazione dei clienti bancari:
 
 ## Documentazione
 
-La documentazione dettagliata è disponibile nella cartella `docs/`:
-- [Descrizione Algoritmo](descrizione_algoritmo.md) - Fondamenti matematici
-- [Formulazione QUBO](formulazione_qubo.md) - Costruzione QUBO dettagliata
-- [Riferimento API](riferimento_api.md) - Documentazione API completa
+Descrizione della documentazione e dei codici ('main'):
+
 
 ## Licenze
 
