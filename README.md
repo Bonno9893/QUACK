@@ -59,15 +59,6 @@ dove i file .txt rappresentano le istanze di test già pronte all'uso.
     
     Questo file permette di **replicare direttamente le configurazioni usate nel paper**, senza dover rilanciare la procedura di ottimizzazione in `ottimizzatore_lambda.py`.
 
-### Configurazione
-
-### Esecuzione
-
-1. Genera o carica le istanze di test
-2. Ottimizza i parametri λ usando Simulated Annealing
-3. Risolve usando il quantum annealer D-Wave
-4. Confronta con i metodi classici
-5. Genera report di performance e visualizzazioni
 
 ## Descrizione dell'Algoritmo
 
@@ -96,6 +87,16 @@ Il parametro λ₂ è cruciale per la qualità della soluzione ed è ottimizzato
 2. **Verifica di Fattibilità**: Assicura che esattamente T punti siano selezionati
 3. **Consistenza Geometrica**: Valutazione della compattezza del cluster
 4. **Cross-validazione**: Usando SA e Gurobi come risolutori di riferimento
+
+
+### Esecuzione
+
+1. Genera o carica le istanze di test
+2. Ottimizza i parametri λ usando Simulated Annealing
+3. Risolve usando il quantum annealer D-Wave
+4. Confronta con i metodi classici
+5. Genera report di performance e visualizzazioni
+
 
 ## Dataset originale
 
@@ -165,14 +166,6 @@ pip install -r requirements.txt
 
 
 ## Metriche di Performance
-
-Il framework valuta le soluzioni usando multiple metriche:
-
-- **Indice di Rand Aggiustato (ARI)**: Misura l'accordo del clustering con il ground truth
-- **Distanza Intra-cluster**: Distanza totale all'interno dei cluster
-- **Tasso di Fattibilità**: Percentuale di soluzioni valide
-- **Tempo di Elaborazione Quantistico**: Tempo di accesso QPU
-- **Overhead di Embedding**: Tempo per il minor embedding sull'hardware quantistico
 
 ## Esempi di Utilizzo
 
