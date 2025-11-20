@@ -1,18 +1,19 @@
 """
-Modulo Risolutore Simulated Annealing
+Risolutore basato su Simulated Annealing per il QUBO dell’Algoritmo 1.
 
-Questo modulo fornisce un risolutore di simulated annealing classico per problemi
-di clustering, servendo sia come risolutore standalone che come strumento per
-l'ottimizzazione dei parametri nella pipeline quantistica.
+Questo modulo definisce un risolutore classico per il problema di
+espansione del cluster, modellato come QUBO, utilizzando il sampler
+di Simulated Annealing fornito dal package neal. Può essere usato
+sia come risolutore standalone, sia come componente interno da altri
+script (ad esempio nell’ottimizzazione del parametro lambda), mantenendo
+un’interfaccia compatibile con quella degli altri risolutori del progetto.
 
-L'implementazione usa il package neal di D-Wave per consistenza con la
-formulazione quantistica, permettendo confronto diretto dei risultati.
-
-Basato sui notebook Simulated-tests.ipynb del progetto QUACK.
-
-Autore: Team Progetto QUACK
-Data: 2024
+L’obiettivo principale è fornire un baseline classico coerente con la
+formulazione quantistica, per confrontare direttamente le soluzioni
+ottenute con D-Wave e con Gurobi.
 """
+
+
 import pickle
 def salva_istanza(instance, nome_file):
     with open(nome_file, 'wb') as file:
