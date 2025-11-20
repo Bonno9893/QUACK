@@ -1,10 +1,8 @@
 """
-Modulo Generatore Istanze Bancarie
+Generatore Istanze Bancarie
 
 Questo modulo crea istanze di test per il caso d'uso bancario del progetto QUACK.
-Genera problemi di clustering basati su dati reali di clienti bancari.
-
-Basato sul notebook create_instances_caso_bank.ipynb del progetto.
+Genera problemi di clustering basati su dati provenienti dal dataset Kaggle "New Marketing Campaign" https://www.kaggle.com/datasets/mikejimenez24/new-marketing-campaign.
 
 Autore: Team Progetto QUACK
 Data: 2024
