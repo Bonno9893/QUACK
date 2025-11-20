@@ -3,8 +3,7 @@
 
 ## Panoramica
 
-Questo repository contiene il codice principale utilizzato nel progetto **QUACK – QUAntum Clustering for Knowledge** per il **caso d’uso bancario** basato sull’**Algoritmo 1 (espansione del cluster)**.  
-Il codice mostra come formulare il problema in forma **QUBO** e come risolverlo usando sia il **quantum annealer di D-Wave** sia due riferimenti classici: **Gurobi** (solver esatto) e **Simulated Annealing** (metaeuristica).
+Questo repository contiene il codice principale utilizzato nel progetto **QUACK – QUAntum Clustering for Knowledge** per il **caso d’uso bancario** basato sull’**Algoritmo 1 (espansione del cluster)**.  Il codice mostra come formulare il problema in forma **QUBO** e come risolverlo usando sia il **quantum annealer di D-Wave** sia due riferimenti classici: **Gurobi** (solver esatto) e **Simulated Annealing** (metaeuristica).
 
 L’obiettivo è documentare in modo riproducibile la pipeline sperimentale usata nel progetto, in modo che chiunque nel gruppo di ricerca possa:
 
@@ -31,10 +30,10 @@ QUACK/
     ├── istanza_2.txt
     └── ...
 ```
-dove i file .txt rappresentano le istanze di test già pronte, generate da crea_istanze_bancarie.py.
+dove i file .txt rappresentano le istanze di test già pronte all'uso.
 
 - **crea_istanze_bancarie.py**  
-  Genera le istanze del problema di espansione del cluster a partire dal dataset bancario originale (non incluso nel repository). Calcola le quantità necessarie (ad esempio le distanze tra clienti) e salva le istanze in uno o più file `.txt`, pronti per essere utilizzati dagli altri script.
+  Genera le istanze del problema di espansione del cluster a partire dal dataset bancario originale (non incluso nel repository). Nella versione originale del progetto le istanze venivano salvate in uno o più file `.pkl`, utilizzati dagli altri script per gli esperimenti. In questo repository sono inoltre presenti file di istanza in formato testuale (`.txt`), creati ad hoc per il paper dedicato all’algoritmo e corrispondenti alle istanze effettivamente utilizzate nelle analisi. Il codice crea_istanze_bancarie.py è stato reso consultabile per mostrare il processo di creazione delle istanze originali, del tutto equivalenti a quelle nel formato '.txt' presenti in quesa repository.
 
 - **ottimizzatore_lambda.py**  
   Esegue la procedura di ottimizzazione del parametro lambda nella formulazione QUBO. Per ciascuna istanza testa diversi valori di lambda, lancia il solver interno e valuta la qualità/fattibilità delle soluzioni per selezionare un valore di lambda appropriato.
