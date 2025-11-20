@@ -183,10 +183,10 @@ Nel paper *“Lookalike Clustering for Customer Segmentation: a Comparative Stud
 
 - **Optimality gap (solo per QA)**  
   Per le soluzioni **fattibili** di QA viene calcolato l’**optimality gap** rispetto a Gurobi, come scostamento percentuale del valore obiettivo di QA rispetto all’ottimo:
-  \[
-  \text{gap}(\%) = \frac{\text{Obj}_{QA} - \text{Obj}_{Gurobi}}{\text{Obj}_{Gurobi}} \cdot 100
-  \]
-  (calcolato solo quando QA restituisce almeno una soluzione fattibile per l’istanza).
+  
+  `gap(%) = (Obj_QA - Obj_Gurobi) / Obj_Gurobi * 100`
+
+  dove `Obj_QA` è il valore della funzione obiettivo per la migliore soluzione trovata da QA e `Obj_Gurobi` è il valore ottimo trovato da Gurobi (calcolato solo quando QA restituisce almeno una soluzione fattibile per l’istanza).
 
 ### 2. Fattibilità e robustezza (QA)
 
