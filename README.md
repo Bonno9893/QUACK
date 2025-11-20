@@ -25,10 +25,12 @@ QUACK/
 ├── risolutore_gurobi.py       # Risoluzione QUBO con Gurobi
 ├── risolutore_simulated_annealing.py     # Risoluzione QUBO con Simulated Annealing
 │
-└── istanze/
-    ├── istanza_1.txt
-    ├── istanza_2.txt
-    └── ...
+├── istanze/
+│    ├── istanza_1.txt
+│   ├── istanza_2.txt
+│   └── ...
+│
+└── lambda.csv
 ```
 dove i file .txt rappresentano le istanze di test già pronte all'uso.
 
