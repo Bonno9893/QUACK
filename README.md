@@ -59,29 +59,6 @@ dove i file .txt rappresentano le istanze di test già pronte all'uso.
     
     Questo file permette di **replicare direttamente le configurazioni usate nel paper**, senza dover rilanciare la procedura di ottimizzazione in `ottimizzatore_lambda.py`.
 
-## Avvio Rapido
-
-### Prerequisiti
-
-1. **Python 3.8+** installato
-2. **D-Wave Ocean SDK** account e token API (per esecuzione quantistica)
-3. **Licenza Gurobi** (per benchmark classico)
-
-### Installazione
-
-```bash
-# Clona il repository
-git clone https://github.com/tuousername/QUACK.git
-cd QUACK
-
-# Crea ambiente virtuale
-python -m venv venv
-source venv/bin/activate  # Su Windows: venv\Scripts\activate
-
-# Installa dipendenze
-pip install -r requirements.txt
-```
-
 ### Configurazione
 
 ### Esecuzione
@@ -119,6 +96,73 @@ Il parametro λ₂ è cruciale per la qualità della soluzione ed è ottimizzato
 2. **Verifica di Fattibilità**: Assicura che esattamente T punti siano selezionati
 3. **Consistenza Geometrica**: Valutazione della compattezza del cluster
 4. **Cross-validazione**: Usando SA e Gurobi come risolutori di riferimento
+
+## Dataset originale
+
+Il caso d’uso bancario si basa sul dataset pubblico **“New Marketing Campaign”**, disponibile su Kaggle:  
+<https://www.kaggle.com/datasets/mikejimenez24/new-marketing-campaign>.
+
+Il dataset contiene oltre 300.000 clienti e descrive, per ciascuno, tre gruppi principali di informazioni:  
+- **variabili economiche** (es. reddito annuale, importi spesi in diverse categorie di prodotto come vino, carne, pesce, dolci, beni di lusso);  
+- **variabili di comportamento d’acquisto** (es. numero di acquisti online, su catalogo, in negozio, visite al sito, utilizzo di sconti);  
+- **variabili demografiche** (es. età, livello di istruzione, stato civile, composizione del nucleo familiare). :contentReference[oaicite:0]{index=0}  
+
+Nel progetto QUACK, il dataset è stato preprocessato rimuovendo le variabili non direttamente legate al comportamento di spesa (es. informazioni socio-demografiche, indicatori di campagne marketing) e mantenendo solo le feature che descrivono **quanto** e **come** i clienti acquistano. Le variabili quantitative sono state standardizzate (media zero, varianza unitaria) per rendere coerente il calcolo delle distanze.
+
+## Costruzione delle istanze
+
+A partire dal dataset preprocessato è stata definita una pipeline in due fasi: **segmentazione iniziale** e **generazione delle istanze**. :contentReference[oaicite:1]{index=1}  
+
+1. **Clustering e selezione dei clienti rappresentativi**  
+   - Si applica un algoritmo di clustering (K-Means) sul dataset standardizzato, scegliendo **2 cluster** come numero ottimale.  
+   - Per ciascun cluster si selezionano i punti più rappresentativi, ossia quelli più vicini al centroide nello spazio delle feature.  
+   - Da questi si costruiscono tre “pool” di riferimento: **Best 400**, **Best 1000** e **Best 2000** punti, che fungono da base per tutte le istanze successive.
+
+2. **Definizione delle istanze di test**  
+   A partire dai pool, vengono generate istanze sperimentali che rappresentano diversi scenari di difficoltà. Ogni istanza è caratterizzata da:
+   - un **cluster iniziale** I_0, composto da un sottoinsieme di clienti “compatibili” tra loro (seed su cui l’algoritmo deve lavorare);  
+   - un insieme di **punti candidati all’espansione** C, estratti dal pool e potenzialmente aggiungibili a I_0;  
+   - una **combinazione di parametri strutturali**, che controllano:
+     - la dimensione relativa di I_0 rispetto ai punti totali (ad esempio, configurazioni con I_0 pari al 25%, 50% o 75% del totale);  
+     - la **percentuale di punti compatibili** dentro C (es. 20%, 40%, 50%, 80%), che introduce un diverso livello di “rumore” nel problema;  
+     - il **numero complessivo di punti** nell’istanza (es. configurazioni con 4, 8, 16, 32 punti), scelto anche in funzione dei vincoli del quantum annealer.
+
+3. **Struttura logica di una istanza**
+
+In termini concettuali, ogni istanza contiene almeno:
+
+- l’elenco dei punti coinvolti (clienti selezionati dal pool) e i relativi **indici**;  
+- l’indicazione di quali punti appartengono al **cluster seed** I_0 e quali sono in C;  
+- il valore target T, cioè quanti nuovi punti il modello deve aggiungere a I_0;  
+- la **matrice di distanza** d_{ij} tra tutti i punti dell’istanza (estratta dalla matrice globale del pool);  
+- alcuni **metadati strutturali** (dimensioni del pool, configurazione di rumore, scenario di difficoltà).
+
+In questa repository le istanze sono fornite in formato testuale (`.txt`), ma mantenengono la stessa struttura logica (seed I_0, candidati C, parametri, matrice di distanza) in una forma più facilmente consultabile e riutilizzabile.
+
+
+## Avvio Rapido
+
+### Prerequisiti
+
+1. **Python 3.8+** installato
+2. **D-Wave Ocean SDK** account e token API (per esecuzione quantistica)
+3. **Licenza Gurobi** (per benchmark classico)
+
+### Installazione
+
+```bash
+# Clona il repository
+git clone https://github.com/tuousername/QUACK.git
+cd QUACK
+
+# Crea ambiente virtuale
+python -m venv venv
+source venv/bin/activate  # Su Windows: venv\Scripts\activate
+
+# Installa dipendenze
+pip install -r requirements.txt
+```
+
 
 ## Metriche di Performance
 
