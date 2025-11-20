@@ -213,21 +213,6 @@ Per l’**algoritmo adattivo di ottimizzazione di lambda** vengono inoltre monit
 Nel codice di questa repository, le informazioni necessarie a ricostruire queste metriche (valori obiettivo, flag di fattibilità, tempi di esecuzione, ecc.) vengono salvate dagli script dei solver e possono essere aggregate per ottenere indicatori analoghi a quelli riportati nel paper.
 
 
-
-## Esempi di Utilizzo
-
-### Istanze Bancarie
-
-
-
-### Ottimizzazione del Parametro Lambda
-
-
-### Risoluzione con D-Wave
-
-
-## Riepilogo dei Risultati
-
 ## Team di Sviluppo
 
 Benedetta Ferrari, Mirko Mucciarini, Filippo Bonafè
