@@ -57,7 +57,7 @@ dove i file .txt rappresentano le istanze di test già pronte all'uso.
   - metadati (ad esempio bacino, livello di rumore, dimensioni dell’istanza);
   - il valore di lambda scelto per gli esperimenti, nella colonna `LAMBDA`.
 
-Questo file permette di **replicare direttamente le configurazioni usate nel paper**, senza dover rilanciare la procedura di ottimizzazione in `ottimizzatore_lambda.py`.
+  Questo file permette di **replicare direttamente le configurazioni usate nel paper**, senza dover rilanciare la procedura di ottimizzazione in `ottimizzatore_lambda.py`.
 
 
 ## Avvio Rapido
