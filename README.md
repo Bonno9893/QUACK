@@ -1,38 +1,41 @@
 [README.md](https://github.com/user-attachments/files/23634444/README.md)
-# Progetto QUACK - Caso d'Uso Bancario con D-Wave Quantum Annealer
+# Progetto QUACK - Caso d'Uso Bancario (Algoritmo 1) con D-Wave Quantum Annealer
 
-## Panoramica del Progetto
+## Panoramica
 
-Il progetto QUACK (QUAntum Clustering for Knowledge) esplora l'applicazione delle tecniche di calcolo quantistico ai problemi di clustering, con un focus specifico sulla segmentazione dei clienti nel settore bancario. Questo repository contiene l'implementazione dell'Algoritmo 1 (Espansione del Cluster) del progetto, utilizzando la tecnologia di quantum annealing di D-Wave, insieme a benchmark classici usando Gurobi e Simulated Annealing.
+Questo repository contiene il codice principale utilizzato nel progetto **QUACK – QUAntum Clustering for Knowledge** per il **caso d’uso bancario** basato sull’**Algoritmo 1 (espansione del cluster)**.  
+Il codice mostra come formulare il problema in forma **QUBO** e come risolverlo usando sia il **quantum annealer di D-Wave** sia due riferimenti classici: **Gurobi** (solver esatto) e **Simulated Annealing** (metaeuristica).
 
-### Obiettivi Principali
+L’obiettivo è documentare in modo riproducibile la pipeline sperimentale usata nel progetto, in modo che chiunque nel gruppo di ricerca possa:
 
-- **Ottimizzazione Quantistica**: Sfruttare il quantum annealer di D-Wave per risolvere problemi di clustering vincolato
-- **Analisi Comparativa**: Confrontare le soluzioni quantistiche con i metodi classici (Gurobi, Simulated Annealing)
-- **Applicazione Reale**: Applicare il clustering quantistico alla segmentazione dei clienti bancari basata sui pattern di spesa
-- **Ottimizzazione dei Parametri**: Implementare l'ottimizzazione adattiva del parametro λ (lambda) per le formulazioni QUBO
+- capire rapidamente che problema viene risolto,
+- vedere come sono state generate le istanze,
+- riutilizzare gli script per nuovi esperimenti.
+
 
 ## Struttura del Repository
 
 ```
-QUACK-Banking-DWave-Clustering/
+QUACK/
+├── README.md
+├── requirements.txt
 │
-├── README.md                           # Questo file
-├── requirements.txt                    # Dipendenze Python
+├── crea_istanze_bancarie.py   # Generazione delle istanze bancarie
+├── ottimizzatore_lambda.py    # Ottimizzazione del parametro lambda
+├── risolutore_dwave.py        # Risoluzione QUBO su D-Wave
+├── risolutore_gurobi.py       # Risoluzione QUBO con Gurobi
+├── simulated_annealing.py     # Risoluzione QUBO con Simulated Annealing
 │
-├── dati/                              # Dati e istanze
-│   ├── istanze/                       # Istanze di test generate
-│   ├── grezzi/                        # Dataset bancario originale
-│
-│   ├── ottimizzazione/                # Algoritmi di ottimizzazione core
-│   │   ├── ottimizzatore_lambda.py   # Ottimizzazione parametro lambda
-│   │
-│   ├── risolutori/                    # Implementazioni dei diversi solver
-│   │   ├── risolutore_dwave.py       # Quantum annealing D-Wave
-│   │   ├── risolutore_gurobi.py      # (DA AGGIUNGERE) Solver esatto Gurobi
-│   │   └── simulated_annealing.py    # (DA AGGIUNGERE) Implementazione SA classica
-
+└── istanze/
+    ├── istanza_1.txt
+    ├── istanza_2.txt
+    └── ...
 ```
+dove i file .txt rappresentano le istanze di test già pronte, generate da crea_istanze_bancarie.py.
+
+
+
+
 
 ## Avvio Rapido
 
