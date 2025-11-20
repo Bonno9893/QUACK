@@ -1,5 +1,4 @@
 """
-"""
 Generazione delle istanze bancarie per l’Algoritmo 1 (progetto QUACK).
 
 Questo script parte dal dataset pubblico "New Marketing Campaign"
@@ -15,8 +14,6 @@ documentare il processo di generazione delle istanze originali.
 Per replicare gli esperimenti descritti nel paper è sufficiente
 utilizzare le istanze .txt e i valori di lambda forniti nel file
 lambda.csv.
-"""
-
 """
 
 import pandas as pd
