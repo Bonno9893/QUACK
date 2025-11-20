@@ -26,7 +26,7 @@ QUACK/
 ├── risolutore_simulated_annealing.py     # Risoluzione QUBO con Simulated Annealing
 │
 ├── istanze/
-│    ├── istanza_1.txt
+│   ├── istanza_1.txt
 │   ├── istanza_2.txt
 │   └── ...
 │
