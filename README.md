@@ -37,7 +37,7 @@ dove i file .txt rappresentano le istanze di test già pronte, generate da crea_
   Genera le istanze del problema di espansione del cluster a partire dal dataset bancario originale (non incluso nel repository). Calcola le quantità necessarie (ad esempio le distanze tra clienti) e salva le istanze in uno o più file `.txt`, pronti per essere utilizzati dagli altri script.
 
 - **ottimizzatore_lambda.py**  
-  Esegue la procedura di ottimizzazione del parametro (\lambda\) nella formulazione QUBO. Per ciascuna istanza testa diversi valori di (\lambda\), lancia il solver interno e valuta la qualità/fattibilità delle soluzioni per selezionare un valore di (\lambda\) appropriato.
+  Esegue la procedura di ottimizzazione del parametro lambda nella formulazione QUBO. Per ciascuna istanza testa diversi valori di lambda, lancia il solver interno e valuta la qualità/fattibilità delle soluzioni per selezionare un valore di lambda appropriato.
 
 - **risolutore_dwave.py**  
   Risolve le istanze QUBO utilizzando il quantum annealer di **D-Wave** tramite l’Ocean SDK. Si occupa di costruire l’input per D-Wave, impostare i parametri principali di esecuzione (ad esempio numero di read) e raccogliere i campioni restituiti dall’hardware.
