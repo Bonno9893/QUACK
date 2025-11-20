@@ -47,7 +47,15 @@ dove i file .txt rappresentano le istanze di test già pronte all'uso.
 - **risolutore_simulated_annealing.py**  
   Contiene un risolutore classico basato su **Simulated Annealing** per il QUBO. Dati i parametri di un’istanza e le impostazioni dell’algoritmo, produce una soluzione approssimata da confrontare con le soluzioni quantistiche e con Gurobi.
 
-
+- **lambda.csv**  
+    Il file `lambda.csv` contiene i valori di \(\lambda\) ottimizzati per le istanze in formato `.txt` presenti in questo repository.  
+    Per ogni istanza sono riportati:
+    
+    - un identificativo coerente con le etichette utilizzate nel paper e nei nomi delle istanze;
+    - alcuni metadati (ad esempio bacino, livello di rumore, dimensioni dell’istanza);
+    - il valore di \(\lambda\) scelto per gli esperimenti, nella colonna `LAMBDA`.
+    
+    Questo file permette di **replicare direttamente le configurazioni usate nel paper**, senza dover rilanciare la procedura di ottimizzazione in `ottimizzatore_lambda.py`.
 
 ## Avvio Rapido
 
