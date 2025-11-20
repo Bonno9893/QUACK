@@ -137,15 +137,15 @@ A partire dal dataset preprocessato è stata definita una pipeline in due fasi: 
      - il **numero complessivo di punti** nell’istanza (es. configurazioni con 4, 8, 16, 32 punti), scelto anche in funzione dei vincoli del quantum annealer.
 
 3. **Struttura logica di una istanza**
-  In termini concettuali, ogni istanza contiene almeno:
-  
-  - l’elenco dei punti coinvolti (clienti selezionati dal pool) e i relativi **indici**;  
-  - l’indicazione di quali punti appartengono al **cluster seed** I_0 e quali sono in C;  
-  - il valore target T, cioè quanti nuovi punti il modello deve aggiungere a I_0;  
-  - la **matrice di distanza** d_{ij} tra tutti i punti dell’istanza (estratta dalla matrice globale del pool);  
-  - alcuni **metadati strutturali** (dimensioni del pool, configurazione di rumore, scenario di difficoltà).
-  
-  In questa repository le istanze sono fornite in formato testuale (`.txt`), ma mantengono la stessa struttura logica (seed I_0, candidati C, parametri, matrice di distanza) in una forma più facilmente consultabile e riutilizzabile.
+    In termini concettuali, ogni istanza contiene almeno:
+    
+    - l’elenco dei punti coinvolti (clienti selezionati dal pool) e i relativi **indici**;  
+    - l’indicazione di quali punti appartengono al **cluster seed** I_0 e quali sono in C;  
+    - il valore target T, cioè quanti nuovi punti il modello deve aggiungere a I_0;  
+    - la **matrice di distanza** d_{ij} tra tutti i punti dell’istanza (estratta dalla matrice globale del pool);  
+    - alcuni **metadati strutturali** (dimensioni del pool, configurazione di rumore, scenario di difficoltà).
+    
+    In questa repository le istanze sono fornite in formato testuale (`.txt`), ma mantengono la stessa struttura logica (seed I_0, candidati C, parametri, matrice di distanza) in una forma più facilmente consultabile e riutilizzabile.
 
 
 ## Avvio Rapido
