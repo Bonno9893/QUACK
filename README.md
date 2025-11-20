@@ -24,7 +24,7 @@ QUACK/
 ├── ottimizzatore_lambda.py    # Ottimizzazione del parametro lambda
 ├── risolutore_dwave.py        # Risoluzione QUBO su D-Wave
 ├── risolutore_gurobi.py       # Risoluzione QUBO con Gurobi
-├── simulated_annealing.py     # Risoluzione QUBO con Simulated Annealing
+├── risolutore_simulated_annealing.py     # Risoluzione QUBO con Simulated Annealing
 │
 └── istanze/
     ├── istanza_1.txt
@@ -33,7 +33,20 @@ QUACK/
 ```
 dove i file .txt rappresentano le istanze di test già pronte, generate da crea_istanze_bancarie.py.
 
+- **crea_istanze_bancarie.py**  
+  Genera le istanze del problema di espansione del cluster a partire dal dataset bancario originale (non incluso nel repository). Calcola le quantità necessarie (ad esempio le distanze tra clienti) e salva le istanze in uno o più file `.txt`, pronti per essere utilizzati dagli altri script.
 
+- **ottimizzatore_lambda.py**  
+  Esegue la procedura di ottimizzazione del parametro \(\lambda\) nella formulazione QUBO. Per ciascuna istanza testa diversi valori di \(\lambda\), lancia il solver interno e valuta la qualità/fattibilità delle soluzioni per selezionare un valore di \(\lambda\) appropriato.
+
+- **risolutore_dwave.py**  
+  Risolve le istanze QUBO utilizzando il quantum annealer di **D-Wave** tramite l’Ocean SDK. Si occupa di costruire l’input per D-Wave, impostare i parametri principali di esecuzione (ad esempio numero di read) e raccogliere i campioni restituiti dall’hardware.
+
+- **risolutore_gurobi.py**  
+  Implementa la stessa formulazione del problema in un modello **Gurobi** e lo risolve come benchmark classico esatto. Fornisce una soluzione di riferimento per confrontare i risultati ottenuti con D-Wave e con gli approcci euristici.
+
+- **risolutore_simulated_annealing.py**  
+  Contiene un risolutore classico basato su **Simulated Annealing** per il QUBO. Dati i parametri di un’istanza e le impostazioni dell’algoritmo, produce una soluzione approssimata da confrontare con le soluzioni quantistiche e con Gurobi.
 
 
 
