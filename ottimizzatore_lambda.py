@@ -121,7 +121,7 @@ from dimod import BinaryQuadraticModel
 #neal simulated annealing
 from neal import SimulatedAnnealingSampler
 
-token="CINE-b8a63847768fc5b69e45edacb4bcc024a10b587f"
+token="TUO-TOKEN"
 
 def check_embedding(source_edgelist):
     from minorminer import find_embedding
