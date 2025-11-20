@@ -112,13 +112,13 @@ Il caso d’uso bancario si basa sul dataset pubblico **“New Marketing Campaig
 Il dataset contiene oltre 300.000 clienti e descrive, per ciascuno, tre gruppi principali di informazioni:  
 - **variabili economiche** (es. reddito annuale, importi spesi in diverse categorie di prodotto come vino, carne, pesce, dolci, beni di lusso);  
 - **variabili di comportamento d’acquisto** (es. numero di acquisti online, su catalogo, in negozio, visite al sito, utilizzo di sconti);  
-- **variabili demografiche** (es. età, livello di istruzione, stato civile, composizione del nucleo familiare). :contentReference[oaicite:0]{index=0}  
+- **variabili demografiche** (es. età, livello di istruzione, stato civile, composizione del nucleo familiare).
 
 Nel progetto QUACK, il dataset è stato preprocessato rimuovendo le variabili non direttamente legate al comportamento di spesa (es. informazioni socio-demografiche, indicatori di campagne marketing) e mantenendo solo le feature che descrivono **quanto** e **come** i clienti acquistano. Le variabili quantitative sono state standardizzate (media zero, varianza unitaria) per rendere coerente il calcolo delle distanze.
 
 ## Costruzione delle istanze
 
-A partire dal dataset preprocessato è stata definita una pipeline in due fasi: **segmentazione iniziale** e **generazione delle istanze**. :contentReference[oaicite:1]{index=1}  
+A partire dal dataset preprocessato è stata definita una pipeline in due fasi: **segmentazione iniziale** e **generazione delle istanze**. 
 
 1. **Clustering e selezione dei clienti rappresentativi**  
    - Si applica un algoritmo di clustering (K-Means) sul dataset standardizzato, scegliendo **2 cluster** come numero ottimale.  
@@ -171,7 +171,7 @@ pip install -r requirements.txt
 
 ## Metriche di performance
 
-Nel paper *“Lookalike Clustering for Customer Segmentation: a Comparative Study of Quantum Annealing and Classical Algorithms”* le prestazioni dei diversi risolutori (QA, SA, Gurobi) sono valutate principalmente rispetto a tre famiglie di metriche. :contentReference[oaicite:0]{index=0}  
+Nel paper *“Lookalike Clustering for Customer Segmentation: a Comparative Study of Quantum Annealing and Classical Algorithms”* le prestazioni dei diversi risolutori (QA, SA, Gurobi) sono valutate principalmente rispetto a tre famiglie di metriche. 
 
 ### 1. Qualità della soluzione
 
@@ -187,7 +187,7 @@ Nel paper *“Lookalike Clustering for Customer Segmentation: a Comparative Stud
 
 ### 2. Fattibilità e robustezza (QA)
 
-Per il quantum annealer di D-Wave vengono misurate, su più run per ogni istanza, le seguenti quantità: :contentReference[oaicite:1]{index=1}  
+Per il quantum annealer di D-Wave vengono misurate, su più run per ogni istanza, le seguenti quantità:
 
 - **%Feas**: percentuale di esecuzioni in cui QA produce almeno una soluzione fattibile (rispetto al vincolo di cardinalità).  
 - **%Opt**: percentuale di esecuzioni in cui QA trova una soluzione con valore obiettivo uguale a quello di Gurobi (entro una tolleranza numerica).  
@@ -196,13 +196,13 @@ Questi indici vengono analizzati per classi di istanze con lo stesso numero di p
 
 ### 3. Efficienza computazionale
 
-Per tutti i risolutori si considera il **tempo di calcolo**: :contentReference[oaicite:2]{index=2}  
+Per tutti i risolutori si considera il **tempo di calcolo**:
 
 - **Tempo QA**: tempo di accesso al QPU (somma di programming time e sampling time) per eseguire le chiamate al quantum annealer.  
 - **Tempo SA**: tempo totale CPU della Simulated Annealing (pre-processing, sampling, post-processing).  
 - **Tempo Gurobi**: tempo CPU necessario a trovare e certificare l’ottimo del modello ridotto.
 
-Per l’**algoritmo adattivo di ottimizzazione di lambda** vengono inoltre monitorati, per gruppi di istanze con stessa dimensione |I'|: :contentReference[oaicite:3]{index=3}  
+Per l’**algoritmo adattivo di ottimizzazione di lambda** vengono inoltre monitorati, per gruppi di istanze con stessa dimensione |I'|:
 
 - il valore finale di lambda restituito dall’algoritmo;
 - il numero medio di iterazioni;
