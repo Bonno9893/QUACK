@@ -1,21 +1,19 @@
 """
-Modulo Risolutore D-Wave Quantum Annealing
+Risolutore D-Wave per il problema di espansione del cluster (Algoritmo 1).
 
-Questo modulo fornisce l'interfaccia per risolvere problemi di clustering usando
-l'hardware di quantum annealing di D-Wave. Gestisce la pipeline completa dalla
-formulazione QUBO all'esecuzione quantistica e al processamento dei risultati.
+Questo modulo prepara e invia la formulazione QUBO del caso d’uso
+bancario al quantum annealer di D-Wave utilizzando l’Ocean SDK.
+A partire da un’istanza salvata su file, costruisce il BinaryQuadraticModel,
+applica un embedding automatico sulla topologia dell’hardware (inclusa
+la scelta di una chain strength tramite uniform_torque_compensation),
+imposta i parametri principali di annealing e raccoglie i campioni
+restituiti dal QPU.
 
-Caratteristiche Principali:
-    - Embedding automatico alla topologia dell'hardware quantistico
-    - Parametri di annealing configurabili
-    - Ottimizzazione della chain strength
-    - Post-processing e validazione dei risultati
-    - Raccolta delle metriche di performance
-
-Autore: Team Progetto QUACK
-Data: 2024
-Licenza: MIT
+I risultati vengono salvati in forma tabellare per consentire il
+confronto, su ciascuna istanza, tra soluzioni quantistiche e soluzioni
+ottenute con i risolutori classici.
 """
+
 import pickle
 def salva_istanza(instance, nome_file):
     with open(nome_file, 'wb') as file:
