@@ -80,13 +80,21 @@ Dove:
 - `T`: Numero target di punti da selezionare
 - `λ₂`: Parametro di penalità per il vincolo di cardinalità
 
-### Ottimizzazione dei Parametri
+### Ottimizzazione del parametro λ
 
-Il parametro λ₂ è cruciale per la qualità della soluzione ed è ottimizzato attraverso:
-1. **Ricerca Adattiva su Griglia**: Test di valori crescenti di λ₂
-2. **Verifica di Fattibilità**: Assicura che esattamente T punti siano selezionati
-3. **Consistenza Geometrica**: Valutazione della compattezza del cluster
-4. **Cross-validazione**: Usando SA e Gurobi come risolutori di riferimento
+Il parametro di penalità λ controlla il peso del vincolo di cardinalità rispetto al termine di distanza.  
+Valori troppo bassi producono soluzioni non fattibili (numero di punti selezionati diverso da T),  
+valori troppo alti forzano il vincolo ma rendono il problema numericamente rigido.
+
+Nel progetto originale λ è stato calibrato off-line **istanza per istanza** tramite lo script `ottimizzatore_lambda.py`, che:
+
+- esplora una griglia di valori candidati di λ;
+- per ciascun valore lancia un risolutore QUBO basato su **Simulated Annealing**;
+- verifica la fattibilità delle soluzioni migliori (rispetto del vincolo di cardinalità) e la coerenza geometrica
+  delle soluzioni trovate.
+
+I valori di λ utilizzati negli esperimenti e riportati nel paper sono salvati nel file `lambda.csv` e, se si utilizzano le stesse istanze, possono
+essere riutilizzati direttamente senza dover rilanciare l’ottimizzazione.
 
 
 ### Esecuzione
@@ -138,7 +146,7 @@ In termini concettuali, ogni istanza contiene almeno:
 - la **matrice di distanza** d_{ij} tra tutti i punti dell’istanza (estratta dalla matrice globale del pool);  
 - alcuni **metadati strutturali** (dimensioni del pool, configurazione di rumore, scenario di difficoltà).
 
-In questa repository le istanze sono fornite in formato testuale (`.txt`), ma mantenengono la stessa struttura logica (seed I_0, candidati C, parametri, matrice di distanza) in una forma più facilmente consultabile e riutilizzabile.
+In questa repository le istanze sono fornite in formato testuale (`.txt`), ma mantengono la stessa struttura logica (seed I_0, candidati C, parametri, matrice di distanza) in una forma più facilmente consultabile e riutilizzabile.
 
 
 ## Avvio Rapido
@@ -153,7 +161,7 @@ In questa repository le istanze sono fornite in formato testuale (`.txt`), ma ma
 
 ```bash
 # Clona il repository
-git clone https://github.com/tuousername/QUACK.git
+git clone https://github.com/Bonno9893/QUACK.git
 cd QUACK
 
 # Crea ambiente virtuale
@@ -164,8 +172,50 @@ source venv/bin/activate  # Su Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+## Metriche di performance
 
-## Metriche di Performance
+Nel paper *“Lookalike Clustering for Customer Segmentation: a Comparative Study of Quantum Annealing and Classical Algorithms”* le prestazioni dei diversi risolutori (QA, SA, Gurobi) sono valutate principalmente rispetto a tre famiglie di metriche. :contentReference[oaicite:0]{index=0}  
+
+### 1. Qualità della soluzione
+
+- **Valore della funzione obiettivo**  
+  Per ogni istanza si considera il valore della funzione obiettivo del problema ridotto (somma di termini lineari e quadratici), indicato come `Obj` per la soluzione ottima trovata da Gurobi e confrontato con i valori ottenuti da QA e SA.
+
+- **Optimality gap (solo per QA)**  
+  Per le soluzioni **fattibili** di QA viene calcolato l’**optimality gap** rispetto a Gurobi, come scostamento percentuale del valore obiettivo di QA rispetto all’ottimo:
+  \[
+  \text{gap}(\%) = \frac{\text{Obj}_{QA} - \text{Obj}_{Gurobi}}{\text{Obj}_{Gurobi}} \cdot 100
+  \]
+  (calcolato solo quando QA restituisce almeno una soluzione fattibile per l’istanza).
+
+### 2. Fattibilità e robustezza (QA)
+
+Per il quantum annealer di D-Wave vengono misurate, su più run per ogni istanza, le seguenti quantità: :contentReference[oaicite:1]{index=1}  
+
+- **%Feas**: percentuale di esecuzioni in cui QA produce almeno una soluzione fattibile (rispetto al vincolo di cardinalità).  
+- **%Opt**: percentuale di esecuzioni in cui QA trova una soluzione con valore obiettivo uguale a quello di Gurobi (entro una tolleranza numerica).  
+
+Questi indici vengono analizzati per classi di istanze con lo stesso numero di punti |I'| e di punti da aggiungere T', per valutare come la qualità delle soluzioni di QA degrada all’aumentare della dimensione del problema.
+
+### 3. Efficienza computazionale
+
+Per tutti i risolutori si considera il **tempo di calcolo**: :contentReference[oaicite:2]{index=2}  
+
+- **Tempo QA**: tempo di accesso al QPU (somma di programming time e sampling time) per eseguire le chiamate al quantum annealer.  
+- **Tempo SA**: tempo totale CPU della Simulated Annealing (pre-processing, sampling, post-processing).  
+- **Tempo Gurobi**: tempo CPU necessario a trovare e certificare l’ottimo del modello ridotto.
+
+Per l’**algoritmo adattivo di ottimizzazione di lambda** vengono inoltre monitorati, per gruppi di istanze con stessa dimensione |I'|: :contentReference[oaicite:3]{index=3}  
+
+- il valore finale di lambda restituito dall’algoritmo;
+- il numero medio di iterazioni;
+- il tempo medio di esecuzione, confrontato con un metodo a passo fisso.
+
+---
+
+Nel codice di questa repository, le informazioni necessarie a ricostruire queste metriche (valori obiettivo, flag di fattibilità, tempi di esecuzione, ecc.) vengono salvate dagli script dei solver e possono essere aggregate per ottenere indicatori analoghi a quelli riportati nel paper.
+
+
 
 ## Esempi di Utilizzo
 
