@@ -1,11 +1,22 @@
 """
-Generatore Istanze Bancarie
+"""
+Generazione delle istanze bancarie per l’Algoritmo 1 (progetto QUACK).
 
-Questo modulo crea istanze di test per il caso d'uso bancario del progetto QUACK.
-Genera problemi di clustering basati su dati provenienti dal dataset Kaggle "New Marketing Campaign" https://www.kaggle.com/datasets/mikejimenez24/new-marketing-campaign.
+Questo script parte dal dataset pubblico "New Marketing Campaign"
+(disponibile su Kaggle) già preprocessato e costruisce le istanze
+utilizzate nel caso d’uso bancario del progetto QUACK. In particolare,
+seleziona i sottoinsiemi di punti (seed e candidati), calcola le
+matrici di distanza e salva le istanze in formato intermedio (.pkl),
+equivalente alle versioni testuali (.txt) presenti nella cartella
+delle istanze di questa repository.
 
-Autore: Team Progetto QUACK
-Data: 2024
+Il file è incluso principalmente a scopo di consultazione, per
+documentare il processo di generazione delle istanze originali.
+Per replicare gli esperimenti descritti nel paper è sufficiente
+utilizzare le istanze .txt e i valori di lambda forniti nel file
+lambda.csv.
+"""
+
 """
 
 import pandas as pd
