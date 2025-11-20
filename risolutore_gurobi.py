@@ -1,14 +1,18 @@
 """
-Modulo Risolutore Gurobi
+Risolutore Gurobi per il problema di espansione del cluster (Algoritmo 1).
 
-Questo modulo fornisce un risolutore esatto usando Gurobi per problemi di clustering.
-Serve come benchmark per confrontare le soluzioni quantistiche con l'ottimo classico.
+Questo modulo costruisce e risolve con Gurobi il modello intero misto
+equivalente alla formulazione QUBO del caso d’uso bancario, partendo
+da una singola istanza salvata su file. La soluzione ottenuta (valore
+ottimo e log di esecuzione) viene usata come benchmark classico per
+confrontare le prestazioni del quantum annealer D-Wave e del risolutore
+basato su Simulated Annealing.
 
-Basato sui file gurobi_model.py e Performance_Gurobi.py del progetto QUACK.
-
-Autore: Team Progetto QUACK
-Data: 2024
+I risultati principali (solver, stato, best bound, best solution, gap,
+tempo) vengono aggiunti al file results_gurobi.csv, uno per istanza
+analizzata.
 """
+
 
 import gurobipy as gp
 import time
