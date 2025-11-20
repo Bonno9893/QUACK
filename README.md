@@ -82,20 +82,18 @@ Dove:
 
 ### Ottimizzazione del parametro λ
 
-Il parametro di penalità λ controlla il peso del vincolo di cardinalità rispetto al termine di distanza.  
+Il parametro di penalità lambda controlla il peso del vincolo di cardinalità rispetto al termine di distanza.  
 Valori troppo bassi producono soluzioni non fattibili (numero di punti selezionati diverso da T),  
-valori troppo alti forzano il vincolo ma rendono il problema numericamente rigido.
+valori troppo alti forzano il vincolo ma rendono il problema numericamente rigido e appiattiscono lo spazio di ricerca.
 
-Nel progetto originale λ è stato calibrato off-line **istanza per istanza** tramite lo script `ottimizzatore_lambda.py`, che:
+Nel progetto originale lambda è stato calibrato off-line, istanza per istanza, tramite lo script `ottimizzatore_lambda.py`, che implementa un algoritmo adattivo ispirato ai subgradienti. A ogni iterazione l’algoritmo:
 
-- esplora una griglia di valori candidati di λ;
-- per ciascun valore lancia un risolutore QUBO basato su **Simulated Annealing**;
-- verifica la fattibilità delle soluzioni migliori (rispetto del vincolo di cardinalità) e la coerenza geometrica
-  delle soluzioni trovate.
+- risolve il QUBO con un risolutore basato su Simulated Annealing per il valore corrente di lambda;
+- valuta la soluzione in termini di fattibilità (rispetto del vincolo di cardinalità) e valore della funzione obiettivo;
+- aumenta lambda quando la soluzione è infeasible;
+- riduce gradualmente il passo di aggiornamento e aggiusta lambda quando trova nuove soluzioni fattibili e migliori.
 
-I valori di λ utilizzati negli esperimenti e riportati nel paper sono salvati nel file `lambda.csv` e, se si utilizzano le stesse istanze, possono
-essere riutilizzati direttamente senza dover rilanciare l’ottimizzazione.
-
+Durante l’esecuzione viene tenuta traccia dei valori di lambda che producono la stessa soluzione ottima e il valore finale di lambda viene calcolato come media di questi valori. I lambda utilizzati negli esperimenti e riportati nel paper sono salvati nel file `lambda.csv` e, se si utilizzano le stesse istanze, possono essere riusati direttamente senza dover rilanciare l’ottimizzazione.
 
 ### Esecuzione
 
