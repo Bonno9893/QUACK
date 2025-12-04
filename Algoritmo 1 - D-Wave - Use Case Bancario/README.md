@@ -1,7 +1,5 @@
 [README.md](https://github.com/user-attachments/files/23634444/README.md)
-### README aggiornato per Algoritmo 1
-
-````markdown
+### README per Algoritmo 1
 # Progetto QUACK - Caso d'Uso Bancario (Algoritmo 1) con D-Wave Quantum Annealer
 
 ## Panoramica
